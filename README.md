@@ -318,10 +318,14 @@ RENDERER_VITE_VARIABLENAME -> creates an env variable for the renderer.
 
 ### Running a battle test.
 
-RENDERER_VITE_ISOPTIONVALID="battle"
-
 RENDERER_VITE_BATTLETEST is the data to start the battle test.
-RENDERER_VITE_BATTLETES="{"testBattlers":[{"actorId":1,"level":1,"equips":[2,1,2,3,0]}],"testTroopId":1}"
+
+```
+
+RENDERER_VITE_ISOPTIONVALID="battle"
+RENDERER_VITE_BATTLETEST="{"testBattlers":[{"actorId":1,"level":1,"equips":[2,1,2,3,0]}],"testTroopId":1}"
+
+```
 
 Keep in mind the data is JSON.parsed so it needs to stay in the format that's inside .env.development.
 
@@ -355,6 +359,10 @@ This is to take advantage of vite modules and also if you want to import package
 
 3. Add this to the end of the file in the public/js/plugins folder:
 
+```
+
 await window.loadPluginJs('pluginName')
+
+```
 
 The pluginName is the one inside src/plugins folder, it doesn't need to be the same name.
