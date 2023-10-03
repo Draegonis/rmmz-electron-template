@@ -1,0 +1,29 @@
+.DS_Store
+node_modules
+dist
+out
+.env.production
+*.log*
+
+## Ignore RMMZ game files.
+src/renderer/public/audio
+src/renderer/public/data
+src/renderer/public/effects
+src/renderer/public/fonts
+src/renderer/public/img
+src/renderer/public/movies
+src/renderer/public/game.rmmzproject
+src/renderer/public/index.html
+src/renderer/public/package.json
+## Ignore the libs, will need to add your own.
+src/renderer/public/js/libs/effekseer.min.js
+src/renderer/public/js/libs/effekseer.wasm
+src/renderer/public/js/libs/vorbisdecoder.js
+## Ignore the original rmmz js files, will need to edit your own.
+## This project is made with Rmmz 1.7.0 in mind, and instructions on how to edit them are in the README.md
+src/renderer/src/rmmz/rmmz_core.js
+src/renderer/src/rmmz/rmmz_managers.js
+src/renderer/src/rmmz/rmmz_objects.js
+src/renderer/src/rmmz/rmmz_scenes.js
+src/renderer/src/rmmz/rmmz_sprites.js
+src/renderer/src/rmmz/rmmz_windows.js
