@@ -1,5 +1,7 @@
 /*
-JsExtensions taken out of rmmz_core.js.
+JsExtensions taken out of rmmz_core.js. If you want you can remove them from your copy of rmmz_core.js,
+it shouldn't cause any issues if left there. It is only placed here to make sure that the extensions are
+available to all the scripts since they are imported as modules.
 */
 
 /**
