@@ -1,3 +1,3 @@
 provider: generic
 url: https://example.com/auto-updates
-updaterCacheDirName: electron-rmmz-updater
+updaterCacheDirName: rmmz-electron-template-updater
