@@ -11,13 +11,10 @@ Designed to use RMMZ Core scripts: 1.7.0 as a base. All the changes/edits/additi
 
 - This project does not support any other RPG Maker version, though it may be possible to edit the Rpg Maker MV core scripts to make it work but that is not part of this project.
 - This project is designed to enhance the deployment of a Rpg Maker MZ game. It is not meant to be a replacement for the engine. Inside the src/renderer/public folder is where you place your Rpg Maker MZ project or web deployment. If you place a project you may want to remove the index.html/package.json/game.rmmzproject in the public folder before packaging. You will need to edit the js files of either a project or web deployment before packaging.
-- There is no garenteed support for 3rd party plugins. Specially ones that are obfuscated,
-  or do not allow edits. Do note that this project does break compatibility with a lot of plugins
-  and will need basic to advanced editting.
-- Files that are already in scr/renderer/public folder are required for the project. You will
-  notice that most of the js files are moved outside and editted.
+- There is no garenteed support for 3rd party plugins. Specially ones that are obfuscated, or do not allow edits. Do note that this project does break compatibility with a lot of plugins and will need basic to advanced editting.
+- Files that are already in scr/renderer/public folder are required for the project. You will need to add in and edit files as described below in the Core Script Editing Instructions. Also if you use plugins they will need to be edited similar to the instructions in the Importing plugin js files section #2.
 
-  ## What this project is good for
+## What this project is good for
 
 - Allows deployment to windows, mac and linux, with targetted architectures.
 - Allows you to customise the game more using electron.
