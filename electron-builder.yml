@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: electron-rmmz
+productName: rmmz-electron-template
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ asarUnpack:
   - resources/**
 asar: true
 win:
-  executableName: electron-rmmz
+  executableName: rmmz-electron-template
   target:
     - target: nsis
       arch:
