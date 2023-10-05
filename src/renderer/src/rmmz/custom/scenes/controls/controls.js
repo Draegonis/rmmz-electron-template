@@ -58,7 +58,7 @@ Scene_Controls.prototype.editGamepad = function () {
 
 Scene_Controls.prototype.confirmCommandRect = function () {
   const ww = this.mainCommandWidth()
-  const wh = this.calcWindowHeight(4, true)
+  const wh = this.calcWindowHeight(2, true)
   const wx = (Graphics.boxWidth - ww) / 2
   const wy = Graphics.boxHeight - wh - 96
   return new Rectangle(wx, wy, ww, wh)
@@ -77,12 +77,13 @@ Scene_Controls.prototype.createConfirmCommand = function () {
 Scene_Controls.prototype.createInfoWindow = function () {
   if (!this._confirmText) {
     const ww = this.mainCommandWidth()
-    const wh = this.calcWindowHeight(2, true)
-    const wx = (Graphics.boxWidth - ww) / 2
-    const wy = Graphics.boxHeight - wh - 96
+    const wh = this.calcWindowHeight(1, true)
+    const wx = (Graphics.boxWidth - ww) / 2 - 50
+    const wy = Graphics.boxHeight - wh - 250
     this._confirmText = new Window_Text(
-      new Rectangle(wx + 20, wy - 75, 500, 60),
-      'Reset inputs to default?'
+      new Rectangle(wx, wy, 350, 60),
+      'Reset inputs to default?',
+      'center'
     )
     this.addWindow(this._confirmText)
   }
@@ -110,6 +111,7 @@ Scene_Controls.prototype.switchControlsWindow = function () {
 Scene_Controls.prototype.commandConfirmYes = function () {
   this.switchControlsWindow()
   window.Input.saveInputs(true)
+  this.playCursorSound()
 }
 
 Scene_Controls.prototype.commandConfirmNo = function () {
