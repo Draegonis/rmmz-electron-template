@@ -126,7 +126,11 @@ Scene_Title.prototype.commandQuitGame = function () {
   this._commandWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
 
   if (!this._confirmText) {
-    this._confirmText = new Window_Text(new Rectangle(wx + 20, wy - 75, 200, 60), 'Are you sure?')
+    this._confirmText = new Window_Text(
+      new Rectangle(wx + 20, wy - 75, 200, 60),
+      'Are you sure?',
+      'center'
+    )
     this.addWindow(this._confirmText)
   }
   this._confirmText.open()
@@ -248,7 +252,8 @@ Scene_Options.prototype.createInfoWindow = function () {
   const wy = 0
   this._infoWindow = new Window_Text(
     new Rectangle(wx, wy, ww, 56),
-    'Full Screen and Window Size will update when you exit.'
+    'Full Screen and Window Size will update when you exit.',
+    'center'
   )
   this.addWindow(this._infoWindow)
   this._infoWindow.open()
@@ -302,7 +307,11 @@ Scene_GameEnd.prototype.commandQuitGame = function () {
   this._commandWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
 
   if (!this._confirmText) {
-    this._confirmText = new Window_Text(new Rectangle(wx + 20, wy - 75, 200, 60), 'Are you sure?')
+    this._confirmText = new Window_Text(
+      new Rectangle(wx + 20, wy - 75, 200, 60),
+      'Are you sure?',
+      'center'
+    )
     this.addWindow(this._confirmText)
   }
   this._confirmText.open()
