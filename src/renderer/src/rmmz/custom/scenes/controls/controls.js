@@ -23,29 +23,29 @@ Scene_Controls.prototype.initialize = function () {
 
 Scene_Controls.prototype.create = function () {
   Scene_MenuBase.prototype.create.call(this)
-  this.createOptionsWindow()
+  this.createControlsWindow()
 }
 
 Scene_Controls.prototype.terminate = function () {
   Scene_MenuBase.prototype.terminate.call(this)
 }
 
-Scene_Controls.prototype.createOptionsWindow = function () {
-  const rect = this.optionsWindowRect()
-  this._optionsWindow = new Window_Controls(rect)
-  this._optionsWindow.setHandler('editKeys', this.editKeys.bind(this))
-  this._optionsWindow.setHandler('editGamepad', this.editGamepad.bind(this))
-  this._optionsWindow.setHandler('resetInput', this.resetInput.bind(this))
-  this._optionsWindow.setHandler('cancel', this.popScene.bind(this))
-  this.addWindow(this._optionsWindow)
-}
-
-Scene_Controls.prototype.optionsWindowRect = function () {
+Scene_Controls.prototype.controlsWindowRect = function () {
   const ww = 450
   const wh = this.calcWindowHeight(4, true)
   const wx = (Graphics.boxWidth - ww) / 2
   const wy = (Graphics.boxHeight - wh) / 2
   return new Rectangle(wx, wy, ww, wh)
+}
+
+Scene_Controls.prototype.createControlsWindow = function () {
+  const rect = this.controlsWindowRect()
+  this._controlsWindow = new Window_Controls(rect)
+  this._controlsWindow.setHandler('editKeys', this.editKeys.bind(this))
+  this._controlsWindow.setHandler('editGamepad', this.editGamepad.bind(this))
+  this._controlsWindow.setHandler('resetInput', this.resetInput.bind(this))
+  this._controlsWindow.setHandler('cancel', this.popScene.bind(this))
+  this.addWindow(this._controlsWindow)
 }
 
 Scene_Controls.prototype.editKeys = function () {
@@ -56,54 +56,64 @@ Scene_Controls.prototype.editGamepad = function () {
   SceneManager.push(Scene_EditGamepad)
 }
 
-Scene_Controls.prototype.resetInput = function () {
-  this._optionsWindow.close()
-  // free up old command window for garbage collection
-  this._optionsWindow = null
-
+Scene_Controls.prototype.confirmCommandRect = function () {
   const ww = this.mainCommandWidth()
-  const wh = this.calcWindowHeight(2, true)
+  const wh = this.calcWindowHeight(4, true)
   const wx = (Graphics.boxWidth - ww) / 2
   const wy = Graphics.boxHeight - wh - 96
+  return new Rectangle(wx, wy, ww, wh)
+}
 
-  const background = window.$dataSystem.titleCommandWindow.background
-  const rect = new Rectangle(wx, wy, ww, wh)
+Scene_Controls.prototype.createConfirmCommand = function () {
+  const rect = this.confirmCommandRect()
+  this._controlsWindow = new Window_ConfirmCommand(rect)
+  this._controlsWindow.setBackgroundType(window.$dataSystem.titleCommandWindow.background)
+  this._controlsWindow.setHandler('confirmYes', this.commandConfirmYes.bind(this))
+  this._controlsWindow.setHandler('confirmNo', this.commandConfirmNo.bind(this))
+  this._controlsWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
+  this.addWindow(this._controlsWindow)
+}
 
-  this._optionsWindow = new Window_ConfirmCommand(rect)
-  this._optionsWindow.setBackgroundType(background)
-
-  this._optionsWindow.setHandler('confirmYes', this.commandConfirmYes.bind(this))
-  this._optionsWindow.setHandler('confirmNo', this.commandConfirmNo.bind(this))
-  this._optionsWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
-
+Scene_Controls.prototype.createInfoWindow = function () {
   if (!this._confirmText) {
+    const ww = this.mainCommandWidth()
+    const wh = this.calcWindowHeight(2, true)
+    const wx = (Graphics.boxWidth - ww) / 2
+    const wy = Graphics.boxHeight - wh - 96
     this._confirmText = new Window_Text(
       new Rectangle(wx + 20, wy - 75, 500, 60),
       'Reset inputs to default?'
     )
-
     this.addWindow(this._confirmText)
   }
-  this._confirmText.open()
+}
 
-  this.addWindow(this._optionsWindow)
-  this._optionsWindow.open()
+Scene_Controls.prototype.resetInput = function () {
+  this._controlsWindow.close()
+  // free up old command window for garbage collection
+  this._controlsWindow = null
+
+  this.createInfoWindow()
+  this.createConfirmCommand()
+  this._confirmText.open()
+  this._controlsWindow.open()
+}
+
+Scene_Controls.prototype.switchControlsWindow = function () {
+  this._controlsWindow.close()
+  this._controlsWindow = null
+  this._confirmText.close()
+  this.createControlsWindow()
 }
 
 // EDIT: Added confirm Yes / No command.
 Scene_Controls.prototype.commandConfirmYes = function () {
-  this._optionsWindow.close()
-  this._optionsWindow = null
-  this._confirmText.close()
+  this.switchControlsWindow()
   window.Input.saveInputs(true)
-  this.createOptionsWindow()
 }
 
 Scene_Controls.prototype.commandConfirmNo = function () {
-  this._optionsWindow.close()
-  this._optionsWindow = null
-  this._confirmText.close()
-  this.createOptionsWindow()
+  this.switchControlsWindow()
 }
 
 export { Scene_Controls }

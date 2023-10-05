@@ -1,5 +1,5 @@
 import { Window_Command } from '../../../../rmmz_windows'
-import { setWaitingForInput } from './common'
+import { setWaitingForInput } from '../common'
 
 function Window_EditKeys() {
   this.initialize(...arguments)
