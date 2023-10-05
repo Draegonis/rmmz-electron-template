@@ -39,11 +39,10 @@ Window_EditKeys.prototype.statusWidth = function () {
 
 Window_EditKeys.prototype.statusText = function (index) {
   const symbolKeys = this.commandSymbol(index).split('-')
-  const lang = 'en'
   if (!window.Input._commands[symbolKeys[0]][symbolKeys[1]]) {
     return ''
   } else {
-    return window.Input.keyboardMap[lang][window.Input._commands[symbolKeys[0]][symbolKeys[1]]]
+    return window.Input.displayInput.keyCode[window.Input._commands[symbolKeys[0]][symbolKeys[1]]]
   }
 }
 

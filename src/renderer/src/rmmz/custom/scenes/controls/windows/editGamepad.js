@@ -47,7 +47,9 @@ Window_EditGamepad.prototype.statusText = function (index) {
   if (window.Input._commands[symbolKeys[0]][symbolKeys[1]] === undefined) {
     return ''
   } else {
-    return window.Input._commands[symbolKeys[0]][symbolKeys[1]]
+    return window.Input.displayInput[symbolKeys[1]][
+      window.Input._commands[symbolKeys[0]][symbolKeys[1]]
+    ]
   }
 }
 
