@@ -73,7 +73,7 @@ const updateEditWindow = function () {
     if (this._infoWindow.visible) {
       this._infoWindow.hide()
       // redraw old input
-      if (window.Input.tempInput.oldCommand) {
+      if (window.Input.tempInput.oldCommand !== window.Input.tempInput.command) {
         const index = this._editWindow.findSymbol(window.Input.tempInput.oldCommand)
         this._editWindow.redrawItem(index)
       }
