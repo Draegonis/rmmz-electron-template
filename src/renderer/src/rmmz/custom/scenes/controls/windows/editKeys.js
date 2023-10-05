@@ -1,4 +1,5 @@
 import { Window_Command } from '../../../../rmmz_windows'
+import { setWaitingForInput } from './common'
 
 function Window_EditKeys() {
   this.initialize(...arguments)
@@ -9,6 +10,7 @@ Window_EditKeys.prototype.constructor = Window_EditKeys
 
 Window_EditKeys.prototype.initialize = function (rect) {
   Window_Command.prototype.initialize.call(this, rect)
+  this.waitingForInput = setWaitingForInput.bind(this)
 }
 
 Window_EditKeys.prototype.makeCommandList = function () {
@@ -46,20 +48,7 @@ Window_EditKeys.prototype.statusText = function (index) {
 }
 
 Window_EditKeys.prototype.processOk = function () {
-  const symbolKeys = this.commandSymbol(this._index).split('-')
-
-  // clear the input and waitForInput will be set to false in Keyboard.js after a keydown.
-  window.Input.clear()
-  window.Input.waitingForInput = true
-
-  // set command/type of input
-  window.Input.tempInput.command = symbolKeys[0]
-  window.Input.tempInput.type = symbolKeys[1]
-
-  // set index for redraw when window.Input.waitingForInput = false at the update in the scene.
-  window.Input.tempInput.index = this.findSymbol(this.commandSymbol(this._index))
-
-  this.playCursorSound()
+  this.waitingForInput()
 }
 
 export { Window_EditKeys }
