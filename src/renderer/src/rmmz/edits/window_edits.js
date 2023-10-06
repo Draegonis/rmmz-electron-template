@@ -1,8 +1,35 @@
-import { Window_Options } from '../../rmmz_windows'
-// Edits
-import { ConfigManager } from '../editsIndex'
+import {
+  Window_MenuCommand,
+  Window_Options,
+  Window_TitleCommand,
+  Window_GameEnd
+} from '../rmmz_windows'
+import { TextManager } from '../rmmz_managers'
+// Import edited ones not the originals.
+import { ConfigManager } from './managers_edits'
 // Helpers
 import { equals as r_equals } from 'ramda'
+//==========================================================================
+// WINDOW_MENUCOMMAND EDITS
+
+Window_MenuCommand.prototype.makeCommandList = function () {
+  this.addMainCommands()
+  this.addFormationCommand()
+  this.addOriginalCommands()
+  this.addOptionsCommand()
+  // Edit: Add in new Controls in menu.
+  this.addControlsCommand()
+  this.addSaveCommand()
+  this.addGameEndCommand()
+}
+
+// Edit: add Controls to main menu.
+Window_MenuCommand.prototype.addControlsCommand = function () {
+  this.addCommand('Controls', 'controls', true)
+}
+
+//==========================================================================
+// WINDOW_OPTIONS EDITS
 
 // Edit: Add window options.
 Window_Options.prototype.makeCommandList = function () {
@@ -149,4 +176,30 @@ Window_Options.prototype.setConfigValue = function (symbol, value) {
   }
 }
 
-export { Window_Options }
+//==========================================================================
+// WINDOW_TITLECOMMAND EDITS
+
+Window_TitleCommand.prototype.makeCommandList = function () {
+  const continueEnabled = this.isContinueEnabled()
+  this.addCommand(TextManager.newGame, 'newGame')
+  this.addCommand(TextManager.continue_, 'continue', continueEnabled)
+  this.addCommand(TextManager.options, 'options')
+  // EDIT: Add controls button
+  this.addCommand('Controls', 'controls')
+  // EDIT: Add quit button.
+  this.addCommand('Quit Game', 'quitGame')
+}
+
+//==========================================================================
+// WINDOW_GAMEEND EDITS
+
+Window_GameEnd.prototype.makeCommandList = function () {
+  this.addCommand(TextManager.toTitle, 'toTitle')
+  // EDIT: Add quit command to menu.
+  this.addCommand('Quit Game', 'toQuit')
+  this.addCommand(TextManager.cancel, 'cancel')
+}
+
+//=======================================================
+// Edit and then re-export only the edited ones.
+export { Window_MenuCommand, Window_Options, Window_TitleCommand, Window_GameEnd }
