@@ -2,7 +2,7 @@ import { Scene_MenuBase } from '../../../rmmz_scenes'
 import { Rectangle } from '../../../rmmz_core'
 import { SceneManager } from '../../../rmmz_managers'
 // Import edited ones not the originals.
-import { Graphics } from '../../../edits/core_edits'
+import { Graphics } from '../../../edits/editsIndex'
 // Import custom
 import { Window_ConfirmCommand } from '../../windows/utility/confirmCommand'
 import { Window_Text } from '../../windows/utility/text'
