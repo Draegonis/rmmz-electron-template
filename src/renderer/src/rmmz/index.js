@@ -137,9 +137,16 @@ import {
 } from './rmmz_windows'
 //=========================================
 // Import edits not originals
-import { Utils, Graphics, WebAudio, Bitmap, Input } from './edits/core_edits'
-import { DataManager, ConfigManager, StorageManager, PluginManager } from './edits/managers_edits'
 import {
+  Utils,
+  Graphics,
+  WebAudio,
+  Bitmap,
+  Input,
+  DataManager,
+  ConfigManager,
+  StorageManager,
+  PluginManager,
   Game_Temp,
   Game_System,
   Game_Timer,
@@ -155,21 +162,17 @@ import {
   Game_Follower,
   Game_Vehicle,
   Game_Event,
-  Game_Interpreter
-} from './edits/objects_edits'
-import {
+  Game_Interpreter,
   Scene_Boot,
   Scene_Title,
   Scene_Menu,
   Scene_Options,
-  Scene_GameEnd
-} from './edits/scenes_edits'
-import {
+  Scene_GameEnd,
   Window_MenuCommand,
   Window_Options,
   Window_TitleCommand,
   Window_GameEnd
-} from './edits/window_edits'
+} from './edits/editsIndex'
 //=========================================
 // Import Custom
 // **** Scene Controls ****

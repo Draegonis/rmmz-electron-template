@@ -2,7 +2,7 @@
 import { Rectangle } from '../../../rmmz_core'
 import { Scene_MenuBase } from '../../../rmmz_scenes'
 // edited rmmz
-import { Graphics } from '../../../edits/core_edits'
+import { Graphics } from '../../../edits/editsIndex'
 // custom
 import { Window_Text } from '../../windows/utility/text'
 // helpers
