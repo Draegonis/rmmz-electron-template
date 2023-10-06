@@ -21,6 +21,57 @@ import { Scene_Controls } from '../custom/scenes/controls/controls'
 import { equals as r_equals } from 'ramda'
 
 //==========================================================================
+// Common Code
+
+// Window_ConfirmCommand functionality in Scene_Title and Scene_GameEnd
+const switchToConfirm = function () {
+  this._commandWindow.close()
+  // free up old command window for garbage collection
+  this._commandWindow = null
+
+  const ww = this.mainCommandWidth()
+  const wh = this.calcWindowHeight(2, true)
+  const wx = (Graphics.boxWidth - ww) / 2
+  const wy = Graphics.boxHeight - wh - 96
+
+  const rect = new Rectangle(wx, wy, ww, wh)
+
+  this._commandWindow = new Window_ConfirmCommand(rect)
+  this._commandWindow.setBackgroundType(0)
+
+  this._commandWindow.setHandler('confirmYes', this.commandConfirmYes.bind(this))
+  this._commandWindow.setHandler('confirmNo', this.commandConfirmNo.bind(this))
+  this._commandWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
+
+  if (!this._confirmText) {
+    this._confirmText = new Window_Text(
+      new Rectangle(wx + 20, wy - 75, 200, 60),
+      'Are you sure?',
+      'center'
+    )
+    this.addWindow(this._confirmText)
+  }
+  this._confirmText.open()
+
+  this.addWindow(this._commandWindow)
+  this._commandWindow.open()
+}
+
+const switchToCommand = function () {
+  this._commandWindow.close()
+  this._confirmText.close()
+  this.createCommandWindow()
+}
+
+const commandQuitConfirmed = function () {
+  this._commandWindow.close()
+  this._confirmText.close()
+  AudioManager.stopBgm()
+  AudioManager.stopBgs()
+  window.electron.ipcRenderer.send('quit-game')
+}
+
+//==========================================================================
 // SCENE_BOOT EDITS
 
 // EDIT: Removed StorageManager.updateForageKeys()
@@ -64,6 +115,13 @@ delete Scene_Boot.screenScale
 
 //==========================================================================
 // SCENE_TITLE EDITS
+
+Scene_Title.prototype.initialize = function () {
+  Scene_Base.prototype.initialize.call(this)
+  this.switchToConfirm = switchToConfirm.bind(this)
+  this.switchToCommand = switchToCommand.bind(this)
+  this.commandQuitConfirmed = commandQuitConfirmed.bind(this)
+}
 
 Scene_Title.prototype.drawGameTitle = function () {
   const x = 20
@@ -113,52 +171,16 @@ Scene_Title.prototype.commandControls = function () {
 // ==========================================================
 // EDIT: Add the quit game command, with a text window.
 Scene_Title.prototype.commandQuitGame = function () {
-  this._commandWindow.close()
-  // free up old command window for garbage collection
-  this._commandWindow = null
-
-  const ww = this.mainCommandWidth()
-  const wh = this.calcWindowHeight(2, true)
-  const wx = (Graphics.boxWidth - ww) / 2
-  const wy = Graphics.boxHeight - wh - 96
-
-  const background = window.$dataSystem.titleCommandWindow.background
-  const rect = new Rectangle(wx, wy, ww, wh)
-
-  this._commandWindow = new Window_ConfirmCommand(rect)
-  this._commandWindow.setBackgroundType(background)
-
-  this._commandWindow.setHandler('confirmYes', this.commandConfirmYes.bind(this))
-  this._commandWindow.setHandler('confirmNo', this.commandConfirmNo.bind(this))
-  this._commandWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
-
-  if (!this._confirmText) {
-    this._confirmText = new Window_Text(
-      new Rectangle(wx + 20, wy - 75, 200, 60),
-      'Are you sure?',
-      'center'
-    )
-    this.addWindow(this._confirmText)
-  }
-  this._confirmText.open()
-
-  this.addWindow(this._commandWindow)
-  this._commandWindow.open()
+  this.switchToConfirm()
 }
 
 // EDIT: Added confirm Yes / No command.
 Scene_Title.prototype.commandConfirmYes = function () {
-  this._commandWindow.close()
-  this._confirmText.close()
-  AudioManager.stopBgm()
-  AudioManager.stopBgs()
-  window.electron.ipcRenderer.send('quit-game')
+  this.commandQuitConfirmed()
 }
 
 Scene_Title.prototype.commandConfirmNo = function () {
-  this._commandWindow.close()
-  this._confirmText.close()
-  this.createCommandWindow()
+  this.switchToCommand()
 }
 
 //==========================================================================
@@ -274,6 +296,13 @@ Scene_Options.prototype.maxCommands = function () {
 //==========================================================================
 // SCENE_GAMEEND EDITS
 
+Scene_GameEnd.prototype.initialize = function () {
+  Scene_MenuBase.prototype.initialize.call(this)
+  this.switchToConfirm = switchToConfirm.bind(this)
+  this.switchToCommand = switchToCommand.bind(this)
+  this.commandQuitConfirmed = commandQuitConfirmed.bind(this)
+}
+
 Scene_GameEnd.prototype.createCommandWindow = function () {
   const rect = this.commandWindowRect()
   this._commandWindow = new Window_GameEnd(rect)
@@ -296,50 +325,16 @@ Scene_GameEnd.prototype.commandWindowRect = function () {
 // ==========================================================
 // EDIT: Add the quit game command, with a text window.
 Scene_GameEnd.prototype.commandQuitGame = function () {
-  this._commandWindow.close()
-  // free up old command window for garbage collection
-  this._commandWindow = null
-
-  const ww = this.mainCommandWidth()
-  const wh = this.calcWindowHeight(2, true)
-  const wx = (Graphics.boxWidth - ww) / 2
-  const wy = (Graphics.boxHeight - wh) / 2
-
-  const rect = new Rectangle(wx, wy, ww, wh)
-  this._commandWindow = new Window_ConfirmCommand(rect)
-  this._commandWindow.setBackgroundType(0)
-
-  this._commandWindow.setHandler('confirmYes', this.commandConfirmYes.bind(this))
-  this._commandWindow.setHandler('confirmNo', this.commandConfirmNo.bind(this))
-  this._commandWindow.setHandler('cancel', this.commandConfirmNo.bind(this))
-
-  if (!this._confirmText) {
-    this._confirmText = new Window_Text(
-      new Rectangle(wx + 20, wy - 75, 200, 60),
-      'Are you sure?',
-      'center'
-    )
-    this.addWindow(this._confirmText)
-  }
-  this._confirmText.open()
-
-  this.addWindow(this._commandWindow)
-  this._commandWindow.open()
+  this.switchToConfirm()
 }
 
 // EDIT: Added confirm Yes / No command.
 Scene_GameEnd.prototype.commandConfirmYes = function () {
-  this._commandWindow.close()
-  this._confirmText.close()
-  AudioManager.stopBgm()
-  AudioManager.stopBgs()
-  window.electron.ipcRenderer.send('quit-game')
+  this.commandQuitConfirmed()
 }
 
 Scene_GameEnd.prototype.commandConfirmNo = function () {
-  this._commandWindow.close()
-  this._confirmText.close()
-  this.createCommandWindow()
+  this.switchToCommand()
 }
 
 //=======================================================
