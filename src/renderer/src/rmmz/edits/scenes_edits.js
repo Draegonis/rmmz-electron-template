@@ -87,6 +87,8 @@ Scene_Title.prototype.createCommandWindow = function () {
   this._commandWindow.setHandler('newGame', this.commandNewGame.bind(this))
   this._commandWindow.setHandler('continue', this.commandContinue.bind(this))
   this._commandWindow.setHandler('options', this.commandOptions.bind(this))
+  // EDIT: Add controls button to title.
+  this._commandWindow.setHandler('controls', this.commandControls.bind(this))
   // EDIT: Add quit game button to title.
   this._commandWindow.setHandler('quitGame', this.commandQuitGame.bind(this))
   this.addWindow(this._commandWindow)
@@ -96,11 +98,16 @@ Scene_Title.prototype.commandWindowRect = function () {
   const offsetX = window.$dataSystem.titleCommandWindow.offsetX
   const offsetY = window.$dataSystem.titleCommandWindow.offsetY
   const ww = this.mainCommandWidth()
-  // EDIT: Increased from 3 -> 4 for the new quit game button.
-  const wh = this.calcWindowHeight(4, true)
+  // EDIT: Increased from 3 -> 5 for the new controls and quit game button.
+  const wh = this.calcWindowHeight(5, true)
   const wx = (Graphics.boxWidth - ww) / 2 + offsetX
-  const wy = Graphics.boxHeight - wh - 96 + offsetY
+  const wy = Graphics.boxHeight - wh - 96 + offsetY + 50
   return new Rectangle(wx, wy, ww, wh)
+}
+
+// EDIT: add command controls to title screen.
+Scene_Title.prototype.commandControls = function () {
+  SceneManager.push(Scene_Controls)
 }
 
 // ==========================================================
