@@ -1,8 +1,8 @@
 import { Rectangle } from '../../rmmz_core'
-import { Scene_Title, Scene_Base } from '../../rmmz_scenes'
+import { Scene_Title } from '../../rmmz_scenes'
 import { SceneManager } from '../../rmmz_managers'
 // Edited
-import { Graphics, Window_TitleCommand } from '../editsIndex'
+import { Graphics, Window_TitleCommand, Scene_Base } from '../editsIndex'
 // Custom
 import { Scene_Controls } from '../../custom/scenes/controls/controls'
 // Common

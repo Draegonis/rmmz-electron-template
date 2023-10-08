@@ -1,5 +1,42 @@
 import { DataManager, BattleManager } from '../../rmmz_managers'
 
+// EDIT: globalInfo returned from electron can be false, since it is not rejected on electron side.
+DataManager.loadGlobalInfo = function () {
+  StorageManager.loadObject('global')
+    .then((globalInfo) => {
+      if (globalInfo) {
+        this._globalInfo = globalInfo
+        this.removeInvalidGlobalInfo()
+        return true
+      } else {
+        this._globalInfo = []
+      }
+    })
+    .catch(() => {
+      this._globalInfo = []
+    })
+}
+
+DataManager.saveGame = function (savefileId) {
+  const contents = this.makeSaveContents()
+  const saveName = this.makeSavename(savefileId)
+  return StorageManager.saveObject(saveName, contents).then(() => {
+    this._globalInfo[savefileId] = this.makeSavefileInfo()
+    this.saveGlobalInfo()
+    return true
+  })
+}
+
+DataManager.loadGame = function (savefileId) {
+  const saveName = this.makeSavename(savefileId)
+  return StorageManager.loadObject(saveName).then((contents) => {
+    this.createGameObjects()
+    this.extractSaveContents(contents)
+    this.correctDataErrors()
+    return true
+  })
+}
+
 // EDIT: Have to send the filename to the electron side and
 // the return if it fails triggers the delete globalInfo.
 DataManager.removeInvalidGlobalInfo = function () {

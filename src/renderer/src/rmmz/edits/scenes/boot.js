@@ -1,6 +1,6 @@
-import { Scene_Boot, Scene_Base } from '../../rmmz_scenes'
+import { Scene_Boot } from '../../rmmz_scenes'
 // Edited
-import { DataManager, ConfigManager, Graphics } from '../editsIndex'
+import { DataManager, ConfigManager, Graphics, Scene_Base } from '../editsIndex'
 
 // EDIT: Removed StorageManager.updateForageKeys()
 Scene_Boot.prototype.create = function () {

@@ -44,7 +44,6 @@ import {
   Game_Unit
 } from './rmmz_objects'
 import {
-  Scene_Base,
   Scene_Battle,
   Scene_Debug,
   Scene_Equip,
@@ -52,12 +51,10 @@ import {
   Scene_Gameover,
   Scene_Item,
   Scene_ItemBase,
-  Scene_Load,
   Scene_Map,
   Scene_MenuBase,
   Scene_Message,
   Scene_Name,
-  Scene_Save,
   Scene_Shop,
   Scene_Skill,
   Scene_Status
@@ -138,15 +135,18 @@ import {
 //=========================================
 // Import edits not originals
 import {
+  // Core
   Utils,
   Graphics,
   WebAudio,
   Bitmap,
   Input,
+  // Managers
   DataManager,
   ConfigManager,
   StorageManager,
   PluginManager,
+  // Objects
   Game_Temp,
   Game_System,
   Game_Timer,
@@ -163,11 +163,16 @@ import {
   Game_Vehicle,
   Game_Event,
   Game_Interpreter,
+  // Scenes
+  Scene_Base,
   Scene_Boot,
   Scene_Title,
   Scene_Menu,
   Scene_Options,
   Scene_GameEnd,
+  Scene_Save,
+  Scene_Load,
+  // Windows
   Window_MenuCommand,
   Window_Options,
   Window_TitleCommand,
