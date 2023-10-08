@@ -2,9 +2,6 @@ import { useInputStore } from '../../store/inputs/useInputStore'
 import '../../store/inputs/Gamepad'
 import '../../store/inputs/Keyboard'
 
-// Get initial input from inputIndex.json.
-await useInputStore.getState().loadInput()
-
 const GameCommands = () => {
   if (window.Input) {
     window.Input._commands = useInputStore((state) => state.commandIndex)

@@ -3,6 +3,14 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 
+const saveInputToFile = async (commandIndexData) => {
+  await window.electron.ipcRenderer
+    .invoke('save-object', undefined, 'inputIndex.json', commandIndexData, false)
+    .catch(() => {
+      console.log('Default Command Index failed to save.')
+    })
+}
+
 const defaultCommandIndex = {
   ok: {
     keyCode: 90,
@@ -52,10 +60,48 @@ const defaultCommandIndex = {
   }
 }
 
+const defaultInputIndex = {}
+// Set the default input index.
+Object.entries(defaultCommandIndex).forEach(([command, inputObj]) => {
+  Object.entries(inputObj).forEach(([type, value]) => {
+    if (!defaultInputIndex[type]) defaultInputIndex[type] = {}
+    defaultInputIndex[type][`${value}`] = command
+  })
+})
+
+let commandIndexData = undefined
+let inputIndexData = undefined
+
+const fileExists = await window.electron.ipcRenderer.invoke(
+  'file-exists',
+  undefined,
+  'inputIndex.json'
+)
+
+if (fileExists) {
+  const commandInputData = await window.electron.ipcRenderer.invoke(
+    'read-object',
+    undefined,
+    'inputIndex.json',
+    false
+  )
+
+  // Set new input index data.
+  inputIndexData = {}
+  Object.entries(commandInputData).forEach(([command, inputObj]) => {
+    Object.entries(inputObj).forEach(([type, value]) => {
+      if (!inputIndexData[type]) inputIndexData[type] = {}
+      inputIndexData[type][`${value}`] = command
+    })
+  })
+} else {
+  saveInputToFile(defaultCommandIndex)
+}
+
 const initInputState = {
-  inputIndex: {},
+  inputIndex: inputIndexData ? inputIndexData : defaultInputIndex,
   // use defaultCommandIndex as base because when saving undefined values are lost.
-  commandIndex: defaultCommandIndex,
+  commandIndex: commandIndexData ? commandIndexData : defaultCommandIndex,
   tab: false,
   ok: false,
   cancel: false,
@@ -86,18 +132,9 @@ const useInputStore = create(
       ...initInputState,
       saveInput: async (resetToDefault) => {
         const setDefaultCommands = () => {
-          console.log('Saved Default.')
-
           set((state) => {
-            Object.entries(defaultCommandIndex).forEach(([command, inputObj]) => {
-              state.commandIndex[command] = {}
-              Object.entries(inputObj).forEach(([type, value]) => {
-                state.commandIndex[command][type] = value
-
-                if (!state.inputIndex[type]) state.inputIndex[type] = {}
-                state.inputIndex[type][`${value}`] = command
-              })
-            })
+            state.commandIndex = defaultCommandIndex
+            state.inputIndex = defaultInputIndex
           })
 
           return defaultCommandIndex
@@ -109,54 +146,22 @@ const useInputStore = create(
           saveObj = setDefaultCommands()
         }
 
-        if (window.electron)
-          await window.electron.ipcRenderer
-            .invoke('save-object', undefined, 'inputIndex.json', saveObj, false)
-            .then(() => {
-              console.log('Command Index saved.')
-            })
-            .catch(() => {
-              console.log('Command Index failed to save.')
-            })
+        saveInputToFile(saveObj)
       },
-      loadInput: async () => {
-        if (window.electron) {
-          const fileExists = await window.electron.ipcRenderer.invoke(
-            'file-exists',
-            undefined,
-            'inputIndex.json'
-          )
-
-          if (fileExists) {
-            const commandIndex = await window.electron.ipcRenderer.invoke(
-              'read-object',
-              undefined,
-              'inputIndex.json',
-              false
-            )
-
-            if (commandIndex) {
-              const currentIndex = get().commandIndex
-              console.log('Command Index loaded.')
-              set((state) => {
-                Object.entries(currentIndex).forEach(([command, inputObj]) => {
-                  state.commandIndex[command] = {}
-                  Object.keys(inputObj).forEach((type) => {
-                    state.commandIndex[command][type] = commandIndex[command][type]
-
-                    if (!state.inputIndex[type]) state.inputIndex[type] = {}
-                    state.inputIndex[type][`${commandIndex[command][type]}`] = command
-                  })
-                })
-              })
-            } else {
-              console.log('Command Index failed to load.')
-              await get().saveInput(true)
+      addNewInputCommand: (commandExtension) => {
+        let needsSave = false
+        set((state) => {
+          Object.entries(commandExtension).forEach(([commandName, inputObj]) => {
+            if (!state.commandIndex[commandName]) {
+              if ('keyCode' in inputObj) state.inputIndex[inputObj['keyCode']] = commandName
+              state.commandIndex[commandName] = inputObj
+              needsSave = true
             }
-          } else {
-            console.log("File doesn't exist.")
-            await get().saveInput(true)
-          }
+          })
+        })
+        if (needsSave) {
+          const commandIndexData = get().commandIndex
+          saveInputToFile(commandIndexData)
         }
       },
       updateInput: (command, type, newInput) => {
@@ -197,5 +202,12 @@ const useInputStore = create(
     store: 'Electron-Vite-Inputs'
   }
 )
+
+export const addNewInput = (commandExtension) => {
+  Object.entries(commandExtension).forEach(([commandName, inputObj]) => {
+    defaultCommandIndex[commandName] = inputObj
+  })
+  useInputStore.getState().addNewInputCommand(commandExtension)
+}
 
 export { useInputStore }
