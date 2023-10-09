@@ -1,4 +1,6 @@
 import { DataManager, BattleManager } from '../../rmmz_managers'
+// Custom
+import { CoreManager } from '../../../managers/coreManager'
 
 // EDIT: globalInfo returned from electron can be false, since it is not rejected on electron side.
 DataManager.loadGlobalInfo = function () {
@@ -44,8 +46,12 @@ DataManager.removeInvalidGlobalInfo = function () {
   for (const info of globalInfo) {
     const savefileId = globalInfo.indexOf(info)
     const saveFileName = this.makeSavename(savefileId)
-    window.electron.ipcRenderer
-      .invoke('file-exists', 'save', StorageManager.fileName(saveFileName))
+    CoreManager.fileExists(...StorageManager.filePath(saveFileName))
+      .then((resp) => {
+        if (!resp) {
+          delete globalInfo[savefileId]
+        }
+      })
       .catch(() => {
         delete globalInfo[savefileId]
       })

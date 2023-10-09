@@ -2,13 +2,15 @@ import { isEmpty as r_isEmpty } from 'ramda'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+// Managers
+import { CoreManager } from '../../managers/coreManager'
+
+const filePath = ['', 'inputIndex.json']
 
 const saveInputToFile = async (commandIndexData) => {
-  await window.electron.ipcRenderer
-    .invoke('save-object', undefined, 'inputIndex.json', commandIndexData, false)
-    .catch(() => {
-      console.log('Default Command Index failed to save.')
-    })
+  await CoreManager.saveToFile(...filePath, commandIndexData, false).catch(() => {
+    console.log('Default Command Index failed to save.')
+  })
 }
 
 const defaultCommandIndex = {
@@ -72,19 +74,10 @@ Object.entries(defaultCommandIndex).forEach(([command, inputObj]) => {
 let commandIndexData = undefined
 let inputIndexData = undefined
 
-const fileExists = await window.electron.ipcRenderer.invoke(
-  'file-exists',
-  undefined,
-  'inputIndex.json'
-)
+const fileExists = await CoreManager.fileExists(...filePath)
 
 if (fileExists) {
-  const commandInputData = await window.electron.ipcRenderer.invoke(
-    'read-object',
-    undefined,
-    'inputIndex.json',
-    false
-  )
+  const commandInputData = await CoreManager.loadFromFile(...filePath, false)
 
   // Set new input index data.
   inputIndexData = {}
