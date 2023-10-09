@@ -1,6 +1,6 @@
 import { Scene_MenuBase } from '../../../rmmz_scenes'
 import { Rectangle } from '../../../rmmz_core'
-import { SceneManager } from '../../../rmmz_managers'
+import { SceneManager, SoundManager } from '../../../rmmz_managers'
 // Import edited ones not the originals.
 import { Graphics } from '../../../edits/editsIndex'
 // Import custom
@@ -111,7 +111,7 @@ Scene_Controls.prototype.switchControlsWindow = function () {
 Scene_Controls.prototype.commandConfirmYes = function () {
   this.switchControlsWindow()
   window.Input.saveInputs(true)
-  this.playCursorSound()
+  SoundManager.playCursor()
 }
 
 Scene_Controls.prototype.commandConfirmNo = function () {

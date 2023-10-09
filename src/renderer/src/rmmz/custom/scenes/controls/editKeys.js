@@ -1,4 +1,6 @@
-import { Scene_MenuBase, Scene_Base } from '../../../rmmz_scenes'
+import { Scene_MenuBase } from '../../../rmmz_scenes'
+// Import edited
+import { Scene_Base } from '../../../edits/editsIndex'
 // Import custom
 import { Window_EditKeys } from './windows/editKeys'
 import {

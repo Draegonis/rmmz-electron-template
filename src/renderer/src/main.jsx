@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { RMMZinject } from './RMMZinject'
 import { Game } from './Game'
 
+window.Imported = window.Imported || {}
+
 // Add the Game name and text data onto the window object.
 window.$APP_NAME = window.electron.process.env.npm_package_productName
 window.$TEST = window.$TEST || {}
