@@ -34,7 +34,7 @@
  * It allows for a set number of autosaves that will be cycled through when it saves. Those autosaves
  * can't be overwriten when manually saving.
  * 
- * Free to use and/or modify for any project. No credit required.
+ * Released under the MIT License.
  */
 
 await window.loadPluginJs('DdmDraegonisSaveOverhaul')
