@@ -77,7 +77,11 @@ addNewInput({ quickload: { keyCode: 119 }, quicksave: { keyCode: 116 } })
 // DataManager
 
 // New variables to hold saving data for quicksave/autosave/hardsave
+window.DataManager.isQuicksaving = false
+window.DataManager.isQuickloading = false
+
 window.DataManager.lastAutosave = ''
+window.DataManager.lastQuicksave = ''
 
 window.DataManager._numOfAutosaves = 0
 window.DataManager._numOfQuicksaves = 0
@@ -92,8 +96,6 @@ delete window.DataManager.makeSavename
 
 // Have to send the filename to the electron side and
 // the return if it fails triggers the delete globalInfo.
-// Changed to async / for await to await the invoke in case the array
-// array changes overlap/out of sync. Might not be needed.
 window.DataManager.removeInvalidGlobalInfo = async function () {
   const removeIndex = []
   for await (const info of this._globalInfo) {
@@ -113,6 +115,9 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
       // this is to track the number of saves of a type.
       this.incrementSavesNum(info.saveType)
     }
+
+    if (!window.DataManager.lastQuicksave && info.saveType === 'Quicksave')
+      window.DataManager.lastQuicksave = info.savefileId
     if (!window.DataManager.lastAutosave && info.saveType === 'Autosave')
       window.DataManager.lastAutosave = info.saveType
   }
@@ -256,6 +261,8 @@ window.DataManager.returnLast = function (saveType) {
   switch (saveType) {
     case 'Autosave':
       return this.lastAutosave
+    case 'Quicksave':
+      return this.lastQuicksave
     default:
       return undefined
   }
@@ -467,3 +474,119 @@ window.Scene_Save.prototype.executeSave = function (savefileId) {
 window.Scene_Load.prototype.firstSavefileId = function () {
   return 0
 }
+
+// ************************************************
+// ================================================
+
+// ================================================
+// Scene_Map
+
+// Reset isQuickloading when the scene starts, so it will autosave on other transitions.
+const DDM_ALIAS_SCENE_MAP_START = window.Scene_Map.prototype.start
+window.Scene_Map.prototype.start = function () {
+  DDM_ALIAS_SCENE_MAP_START.call(this)
+  if (window.DataManager.isQuickloading) window.DataManager.isQuickloading = false
+}
+
+// Prevent autosaving when quickloading.
+window.Scene_Map.prototype.shouldAutosave = function () {
+  return !this._lastMapWasNull && !window.DataManager.isQuickloading
+}
+
+window.Scene_Map.prototype.quickloadFade = function () {
+  window.Graphics.screenTransition()
+  const time = 0
+  window.AudioManager.fadeOutBgm(time)
+  window.AudioManager.fadeOutBgs(time)
+  window.AudioManager.fadeOutMe(time)
+}
+
+// New function for the Scene_Map to perform quicksaves.
+window.Scene_Map.prototype.quickSave = async function () {
+  const quicksaveId = makeSavefileId('Quicksave')
+
+  window.DataManager.lastQuicksave = quicksaveId
+
+  window.$gameSystem.onBeforeSave()
+  const contents = window.DataManager.makeSaveContents()
+
+  window.StorageManager.saveObject(quicksaveId, contents).then(() => {
+    makeGlobalInfoSave(quicksaveId, window.DataManager)
+    window.DataManager.isQuicksaving = false
+    window.SoundManager.playSave()
+    return true
+  })
+}
+
+// New function for Scene_Map to perform quickloads.
+window.Scene_Map.prototype.quickload = function () {
+  if (window.DataManager.lastQuicksave === '') return
+  const savefileId = window.DataManager.lastQuicksave
+
+  this.quickloadFade()
+
+  window.DataManager.loadGame(savefileId).then(() => {
+    window.SoundManager.playLoad()
+    const mapId = window.$gameMap.mapId()
+    const x = window.$gamePlayer.x
+    const y = window.$gamePlayer.y
+    const d = window.$gamePlayer.direction()
+    window.$gamePlayer.reserveTransfer(mapId, x, y, d, 0)
+    window.$gamePlayer.requestMapReload()
+  })
+}
+
+// ================================================
+// Add to updateScene in Scene_Map + add functions
+// to get the quickload and quicksave working.
+
+window.Scene_Map.prototype.updateScene = function () {
+  this.checkGameover()
+  if (!window.SceneManager.isSceneChanging()) {
+    this.updateTransferPlayer()
+  }
+  if (!window.SceneManager.isSceneChanging()) {
+    this.updateEncounter()
+  }
+  if (!window.SceneManager.isSceneChanging()) {
+    this.updateCallMenu()
+  }
+  if (!window.SceneManager.isSceneChanging()) {
+    this.updateCallDebug()
+  }
+  if (!window.SceneManager.isSceneChanging()) {
+    this.updateQuicksave()
+  }
+  if (!window.SceneManager.isSceneChanging()) {
+    this.updateQuickload()
+  }
+}
+
+window.Scene_Map.prototype.updateQuicksave = function () {
+  if (window.$gameSystem.isSaveEnabled() && !window.DataManager.isQuicksaving) {
+    if (this.isQuicksaveCalled()) {
+      window.DataManager.isQuicksaving = true
+      this.quickSave()
+    }
+  }
+}
+
+window.Scene_Map.prototype.isQuicksaveCalled = function () {
+  return window.Input.isTriggered('quicksave') && !this.isBusy()
+}
+
+window.Scene_Map.prototype.updateQuickload = function () {
+  if (window.$gameSystem.isSaveEnabled() && !window.DataManager.isQuicksaving) {
+    if (this.isQuickloadCalled()) {
+      window.DataManager.isQuickloading = true
+      this.quickload()
+    }
+  }
+}
+
+window.Scene_Map.prototype.isQuickloadCalled = function () {
+  return window.Input.isTriggered('quickload') && !this.isBusy()
+}
+
+// ************************************************
+// ================================================
