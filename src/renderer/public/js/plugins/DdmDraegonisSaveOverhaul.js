@@ -16,6 +16,12 @@
  * @default 5
  * @desc The max number of autosaves allowed.
  * 
+ * @param maxQuicksaves
+ * @text Max Quicksaves
+ * @type number
+ * @default 5
+ * @desc The max number of quicksaves allowed.
+ * 
  * @param IMPORT_AS_MODULE
  * @text Import as Module
  * @type boolean

@@ -11,6 +11,7 @@ const emptySlotName = 'Empty Save Slot'
 const params = window.PluginManager.parameters(pluginName)
 const enableAutosave = params.enable_autosave === 'true'
 const maxAutoSaves = Number(params.maxAutosaves || 5)
+const maxQuicksaves = Number(params.maxQuicksaves || 5)
 
 addNewInput({ quickload: { keyCode: 119 }, quicksave: { keyCode: 116 } })
 
@@ -26,7 +27,7 @@ window.DataManager._numOfQuicksaves = 0
 window.DataManager._numOfHardsaves = 0
 
 window.DataManager._maxAutoSaves = maxAutoSaves > 0 ? maxAutoSaves : 1
-window.DataManager._maxQuicksaves = 5
+window.DataManager._maxQuicksaves = maxQuicksaves > 0 ? maxQuicksaves : 1
 window.DataManager._maxHardsaves = 20
 
 // This is no longer used.
