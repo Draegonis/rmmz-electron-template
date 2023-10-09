@@ -1,10 +1,65 @@
 import { addNewInput } from '../store/inputs/useInputStore'
 
+// ================================================
+// Helpers
+
+// This handles shifting the save to the first index of globalInfo, and saves globalInfo
+const makeGlobalInfoSave = function (saveId, dataManager) {
+  const fileIndex = dataManager._globalInfo.findIndex((file) => file.savefileId === saveId)
+
+  const newInfo = dataManager.makeSavefileInfo(saveId)
+
+  if (fileIndex > 0) {
+    // if fileIndex is > 0, remove it from the globalInfo array and place a new entry at the front
+    // of the array.
+    dataManager._globalInfo.splice(fileIndex, 1)
+    dataManager._globalInfo.unshift(newInfo)
+  } else if (fileIndex === 0) {
+    // if fileIndex is 0, update the first entry.
+    dataManager._globalInfo[0] = newInfo
+  } else {
+    // if fileIndex = -1 only add the new entry in front of the globalInfo array.
+    dataManager._globalInfo.unshift(newInfo)
+  }
+
+  dataManager.saveGlobalInfo()
+}
+
+// Used for Autosave and Quicksave in order to create the savefileId
+// and increment the current number of saves if needed.
+const makeSavefileId = function (saveType) {
+  const dataManager = window.DataManager
+  let savefileId = ''
+
+  const lastSave = dataManager.returnLast(saveType)
+  const currentSaveNum = dataManager.returnSavesNum(saveType)
+  const maxSaves = dataManager.returnMaxSaves(saveType)
+
+  if (lastSave === `${saveType}-${maxSaves}`) {
+    savefileId = `${saveType}-1`
+  } else if (lastSave === '') {
+    savefileId = `${saveType}-1`
+    dataManager.incrementSavesNum(saveType)
+  } else {
+    let saveNumber = Number(lastSave.split('-')[1])
+    saveNumber++
+    if (currentSaveNum < maxSaves) dataManager.incrementSavesNum(saveType)
+    savefileId = `${saveType}-${saveNumber}`
+  }
+
+  return savefileId
+}
+
+// ************************************************
+// ================================================
+
+// ================================================
+// Setup/Params
+
 const pluginName = 'DdmDraegonisSaveOverhaul'
 
 window.Imported = window.Imported || {}
-window.Imported.DdmDraegonis = window.Imported.DdmDraegonis || {}
-window.Imported.DdmDraegonis.SaveOverhaul = true
+window.Imported[pluginName] = 1.0
 
 const emptySlotName = 'Empty Save Slot'
 
@@ -15,12 +70,14 @@ const maxQuicksaves = Number(params.maxQuicksaves || 5)
 
 addNewInput({ quickload: { keyCode: 119 }, quicksave: { keyCode: 116 } })
 
-//============
+// ************************************************
+// ================================================
+
+// ================================================
 // DataManager
 
 // New variables to hold saving data for quicksave/autosave/hardsave
-window.DataManager.earliestQuicksave = ''
-window.DataManager.earliestAutosave = ''
+window.DataManager.lastAutosave = ''
 
 window.DataManager._numOfAutosaves = 0
 window.DataManager._numOfQuicksaves = 0
@@ -56,6 +113,8 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
       // this is to track the number of saves of a type.
       this.incrementSavesNum(info.saveType)
     }
+    if (!window.DataManager.lastAutosave && info.saveType === 'Autosave')
+      window.DataManager.lastAutosave = info.saveType
   }
 
   if (removeIndex.length > 0) {
@@ -73,12 +132,6 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
     // save the new global info.
     window.DataManager.saveGlobalInfo()
   }
-
-  // Set the earliest save for the autosave/quicksave rotation after the invalid globalInfo's are removed.
-  const earliestQuicksave = this.earliestSavefileId('Quicksave')
-  this.earliestQuicksave = earliestQuicksave ? earliestQuicksave : ''
-  const earliestAutosave = this.earliestSavefileId('Autosave')
-  this.earliestAutosave = earliestAutosave ? earliestAutosave : ''
 }
 
 window.DataManager.isAnySavefileExists = function () {
@@ -90,21 +143,8 @@ window.DataManager.latestSavefileId = function () {
   return this._globalInfo[0].savefileId
 }
 
-// returns the safefileId of the earliest instead of an int.
-window.DataManager.earliestSavefileId = function (saveType) {
-  const globalInfo = saveType
-    ? this._globalInfo.filter((info) => info.saveType === saveType)
-    : this._globalInfo
-  if (globalInfo.length > 0) {
-    const earliest = Math.min(...globalInfo.map((x) => x.timestamp))
-    if (earliest.length > 0) {
-      const info = globalInfo.find((x) => x && x.timestamp === earliest)
-      return info.savefileId
-    }
-    return undefined
-  }
-  return undefined
-}
+// This is no longer used.
+delete window.DataManager.earliestSavefileId
 
 // removed selectSavefileForNewGame as it is no longer needed.
 // New saves are automatically added in front of the globalInfo array.
@@ -157,6 +197,7 @@ window.DataManager.currentTotalSavesNum = function () {
   return autoSaveCount + this._numOfQuicksaves + this._numOfHardsaves
 }
 
+// This is mostly for Hardsave since Autosave and Quicksave cycle through it's kinda pointless to use for them.
 window.DataManager.nextEmptySaveNumber = function (saveType) {
   let saveTest = 1
   let returnNum = 0
@@ -211,6 +252,15 @@ window.DataManager.decrementSavesNum = function (saveType) {
   }
 }
 
+window.DataManager.returnLast = function (saveType) {
+  switch (saveType) {
+    case 'Autosave':
+      return this.lastAutosave
+    default:
+      return undefined
+  }
+}
+
 window.DataManager.savefileInfo = function (savefileId) {
   const globalInfo = this._globalInfo
   // change because savefileId is no longer an int to index globalInfo.
@@ -218,34 +268,11 @@ window.DataManager.savefileInfo = function (savefileId) {
   return saveInfo ? saveInfo : null
 }
 
-// WIP - when saving add a new empty object at the end of the array unless
-// the array length is too long.
 window.DataManager.saveGame = function (savefileId) {
   const contents = this.makeSaveContents()
   const saveName = savefileId
   return StorageManager.saveObject(saveName, contents).then(() => {
-    // since savefileId is no longer an index in globalInfo array, need to find the index
-    // in order to update the globalInfo array. Makes the new save the first entry into the array
-    // so it should appear at the top of the save file list.
-
-    const fileIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
-
-    const newInfo = this.makeSavefileInfo(savefileId)
-
-    if (fileIndex > 0) {
-      // if fileIndex is > 0, remove it from the globalInfo array and place a new entry at the front
-      // of the array.
-      this._globalInfo.splice(fileIndex, 1)
-      this._globalInfo.unshift(newInfo)
-    } else if (fileIndex === 0) {
-      // if fileIndex is 0, update the first entry.
-      this._globalInfo[0] = newInfo
-    } else {
-      // if fileIndex = -1 only add the new entry in front of the globalInfo array.
-      this._globalInfo.unshift(newInfo)
-    }
-
-    this.saveGlobalInfo()
+    makeGlobalInfoSave(savefileId, this)
     return true
   })
 }
@@ -276,10 +303,10 @@ window.DataManager.makeSavefileInfo = function (savefileId) {
   return info
 }
 
-//*********/
-//==========
+// ************************************************
+// ================================================
 
-//====================
+// ================================================
 // Window_SavefileList
 
 window.Window_SavefileList.prototype.initialize = function (rect) {
@@ -327,6 +354,7 @@ window.Window_SavefileList.prototype.isEnabled = function (savefileId) {
 
 delete window.Window_SavefileList.savefileIdToIndex
 
+// No longer has to factor in autosaves, since the most recent is always index 0.
 window.Window_SavefileList.prototype.selectSavefile = function (index) {
   this.select(index)
   this.setTopRow(index - 2)
@@ -336,10 +364,10 @@ window.Window_SavefileList.prototype.drawTitle = function (savefileId, x, y) {
   this.drawText(savefileId, x, y, 180)
 }
 
-//******************/
-//==================
+// ************************************************
+// ================================================
 
-//===========
+// ================================================
 // Scene_Base
 
 window.Scene_Base.prototype.isAutosaveEnabled = function () {
@@ -352,23 +380,9 @@ window.Scene_Base.prototype.isAutosaveEnabled = function () {
 }
 
 window.Scene_Base.prototype.executeAutosave = function () {
-  const maxNumAutosaves = window.DataManager.maxAutoSaves()
-  const currentNumAutoSaves = window.DataManager.returnSavesNum('Autosave')
+  const autosaveId = makeSavefileId('Autosave')
 
-  let autosaveId = ''
-
-  if (window.DataManager.earliestAutosave === `Autosave-${maxNumAutosaves}`) {
-    autosaveId = 'Autosave-1'
-  } else if (window.DataManager.earliestAutosave === '') {
-    autosaveId = 'Autosave-1'
-  } else {
-    let saveNumber = Number(window.DataManager.earliestAutosave.split('-')[1])
-    saveNumber++
-    if (currentNumAutoSaves < maxNumAutosaves) window.DataManager.incrementSavesNum('Autosave')
-    autosaveId = `Autosave-${saveNumber}`
-  }
-
-  window.DataManager.earliestAutosave = autosaveId
+  window.DataManager.lastAutosave = autosaveId
 
   window.$gameSystem.onBeforeSave()
   window.DataManager.saveGame(autosaveId)
@@ -386,7 +400,10 @@ window.Scene_Base.prototype.executeAutosave = function () {
     })
 }
 
-//===========
+// ************************************************
+// ================================================
+
+// ================================================
 // Scene_File
 
 window.Scene_File.prototype.createListWindow = function () {
@@ -400,9 +417,13 @@ window.Scene_File.prototype.createListWindow = function () {
   this.addWindow(this._listWindow)
 }
 
+// This isn't needed as it is handled by another method.
 delete window.Scene_File.prototype.needsAutosave
 
-//===========
+// ************************************************
+// ================================================
+
+// ================================================
 // Scene_Save
 
 window.Scene_Save.prototype.helpWindowText = function () {
@@ -437,7 +458,10 @@ window.Scene_Save.prototype.executeSave = function (savefileId) {
     })
 }
 
-//===========
+// ************************************************
+// ================================================
+
+// ================================================
 // Scene_Load
 
 window.Scene_Load.prototype.firstSavefileId = function () {
