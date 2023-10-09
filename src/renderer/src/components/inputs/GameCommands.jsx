@@ -30,6 +30,10 @@ const GameCommands = () => {
     window.Input._currentState['ui_right'] = useInputStore((state) => state.ui_right)
     // New Buttons
     window.Input._currentState['ui_toggle'] = useInputStore((state) => state.ui_toggle)
+
+    // New inputs
+    window.Input._currentState['quicksave'] = useInputStore((state) => state.quicksave)
+    window.Input._currentState['quickload'] = useInputStore((state) => state.quickload)
   }
 
   return null
