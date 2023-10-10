@@ -491,6 +491,11 @@ window.Scene_Map.prototype.quickloadFade = function () {
   window.AudioManager.fadeOutMe(time)
 }
 
+// New to be able to hook into quicksave success.
+window.Scene_Map.prototype.onQuicksaveSuccess = function () {
+  window.SoundManager.playSave()
+}
+
 // New function for the Scene_Map to perform quicksaves.
 window.Scene_Map.prototype.quickSave = async function () {
   const quicksaveId = makeSavefileId('Quicksave')
@@ -498,13 +503,14 @@ window.Scene_Map.prototype.quickSave = async function () {
   window.DataManager.lastQuicksave = quicksaveId
 
   window.$gameSystem.onBeforeSave()
-  const contents = window.DataManager.makeSaveContents()
 
-  window.StorageManager.saveObject(quicksaveId, contents).then(() => {
-    makeGlobalInfoSave(quicksaveId, window.DataManager)
+  window.DataManager.saveGame(quicksaveId).then((resp) => {
     window.DataManager.isQuicksaving = false
-    window.SoundManager.playSave()
-    return true
+    if (resp) {
+      this.onQuicksaveSuccess()
+      return true
+    }
+    return false
   })
 }
 
@@ -522,7 +528,9 @@ window.Scene_Map.prototype.quickload = function () {
     const y = window.$gamePlayer.y
     const d = window.$gamePlayer.direction()
     window.$gamePlayer.reserveTransfer(mapId, x, y, d, 0)
-    window.$gamePlayer.requestMapReload()
+    if (window.$gameSystem.versionId() !== window.$dataSystem.versionId) {
+      window.$gamePlayer.requestMapReload()
+    }
   })
 }
 
