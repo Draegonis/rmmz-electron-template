@@ -4,3 +4,5 @@ export const parseSelfSW = (id) => {
 }
 
 export const parseNumber = (value) => Number(value || -1)
+
+export const parseBoolean = (value) => value.toLowerCase() === 'true'
