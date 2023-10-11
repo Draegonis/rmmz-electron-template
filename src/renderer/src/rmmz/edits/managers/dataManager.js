@@ -2,6 +2,9 @@ import { DataManager, BattleManager } from '../../rmmz_managers'
 // Custom
 import { CoreManager } from '../../../managers/coreManager'
 
+// A savefileId holder to add move save data to other files.
+DataManager.currentSave = ''
+
 // EDIT: globalInfo returned from electron can be false, since it is not rejected on electron side.
 DataManager.loadGlobalInfo = function () {
   StorageManager.loadObject('global')
@@ -20,6 +23,8 @@ DataManager.loadGlobalInfo = function () {
 }
 
 DataManager.saveGame = function (savefileId) {
+  this.currentSave = savefileId
+
   const contents = this.makeSaveContents()
   const saveName = this.makeSavename(savefileId)
   return StorageManager.saveObject(saveName, contents).then(() => {
@@ -30,6 +35,8 @@ DataManager.saveGame = function (savefileId) {
 }
 
 DataManager.loadGame = function (savefileId) {
+  this.currentSave = savefileId
+
   const saveName = this.makeSavename(savefileId)
   return StorageManager.loadObject(saveName).then((contents) => {
     this.createGameObjects()

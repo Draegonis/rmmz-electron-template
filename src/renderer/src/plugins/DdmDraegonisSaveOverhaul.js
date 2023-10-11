@@ -270,6 +270,8 @@ window.DataManager.savefileInfo = function (savefileId) {
 }
 
 window.DataManager.saveGame = function (savefileId) {
+  this.currentSave = savefileId
+
   const contents = this.makeSaveContents()
   const saveName = savefileId
   return StorageManager.saveObject(saveName, contents).then(() => {
@@ -279,6 +281,8 @@ window.DataManager.saveGame = function (savefileId) {
 }
 
 window.DataManager.loadGame = function (savefileId) {
+  this.currentSave = savefileId
+
   const saveName = savefileId
   return StorageManager.loadObject(saveName).then((contents) => {
     this.createGameObjects()
