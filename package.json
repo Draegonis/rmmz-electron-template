@@ -1,7 +1,7 @@
 {
   "name": "rmmz-electron-template",
   "productName": "Rmmz Electron Template",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A template that will allow you to deploy your Rpg Maker MZ game as an electron app.",
   "main": "./out/main/index.js",
   "author": "DdmDraegonis",
@@ -44,6 +44,7 @@
     "ramda": "^0.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "uuid": "^9.0.1",
     "vite": "^4.4.9",
     "zustand": "^4.4.1"
   }
