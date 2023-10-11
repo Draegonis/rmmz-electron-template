@@ -270,6 +270,8 @@ window.DataManager.savefileInfo = function (savefileId) {
 }
 
 window.DataManager.saveGame = function (savefileId) {
+  this.currentSave = savefileId
+
   const contents = this.makeSaveContents()
   const saveName = savefileId
   return StorageManager.saveObject(saveName, contents).then(() => {
@@ -279,6 +281,8 @@ window.DataManager.saveGame = function (savefileId) {
 }
 
 window.DataManager.loadGame = function (savefileId) {
+  this.currentSave = savefileId
+
   const saveName = savefileId
   return StorageManager.loadObject(saveName).then((contents) => {
     this.createGameObjects()
@@ -496,6 +500,10 @@ window.Scene_Map.prototype.onQuicksaveSuccess = function () {
   window.SoundManager.playSave()
 }
 
+window.Scene_Map.prototype.onQuickloadSuccess = function () {
+  window.SoundManager.playLoad()
+}
+
 // New function for the Scene_Map to perform quicksaves.
 window.Scene_Map.prototype.quickSave = async function () {
   const quicksaveId = makeSavefileId('Quicksave')
@@ -521,16 +529,20 @@ window.Scene_Map.prototype.quickload = function () {
 
   this.quickloadFade()
 
-  window.DataManager.loadGame(savefileId).then(() => {
-    window.SoundManager.playLoad()
-    const mapId = window.$gameMap.mapId()
-    const x = window.$gamePlayer.x
-    const y = window.$gamePlayer.y
-    const d = window.$gamePlayer.direction()
-    window.$gamePlayer.reserveTransfer(mapId, x, y, d, 0)
-    if (window.$gameSystem.versionId() !== window.$dataSystem.versionId) {
-      window.$gamePlayer.requestMapReload()
+  window.DataManager.loadGame(savefileId).then((resp) => {
+    if (resp) {
+      const mapId = window.$gameMap.mapId()
+      const x = window.$gamePlayer.x
+      const y = window.$gamePlayer.y
+      const d = window.$gamePlayer.direction()
+      window.$gamePlayer.reserveTransfer(mapId, x, y, d, 0)
+      if (window.$gameSystem.versionId() !== window.$dataSystem.versionId) {
+        window.$gamePlayer.requestMapReload()
+      }
+      this.onQuickloadSuccess()
+      return true
     }
+    return false
   })
 }
 
