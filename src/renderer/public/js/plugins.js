@@ -4,5 +4,6 @@ var $plugins =
 [
 {"name":"CaethyrilAudioPause","status":true,"description":"Pause/resume audio (and Effekseer) with the game loop.","parameters":{"IMPORT_AS_MODULE":"true"}},
 {"name":"EffekseerForRPGMakerMZ_Ex","status":true,"description":"Effekseer Extended plugin v1.70e - 1.05","parameters":{"InstanceMaxCount":"10000","SquareMaxCount":"10000","DistortionEnabled":"true","IMPORT_AS_MODULE":"true"}},
-{"name":"DdmDraegonisSaveOverhaul","status":true,"description":"A plugin to change the Save system to a more modern way.","parameters":{"enable_autosave":"true","maxAutosaves":"5","maxQuicksaves":"5","IMPORT_AS_MODULE":"true"}}
+{"name":"DdmDraegonisSaveOverhaul","status":true,"description":"A plugin to change the Save system to a more modern way.","parameters":{"enable_autosave":"true","maxAutosaves":"5","maxQuicksaves":"5","IMPORT_AS_MODULE":"true"}},
+{"name":"DdmDraegonisPersistedData","status":true,"description":"A plugin to allow persisted data between save files.","parameters":{"variableList":"[\"6\"]","switchList":"[\"6\"]","eventList":"[\"{\\\"mapId\\\":\\\"1\\\",\\\"eventId\\\":\\\"1\\\",\\\"switchId\\\":\\\"A\\\"}\"]","IMPORT_AS_MODULE":"true"}}
 ];
