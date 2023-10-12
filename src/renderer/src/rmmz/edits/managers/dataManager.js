@@ -1,9 +1,6 @@
 import { DataManager, BattleManager } from '../../rmmz_managers'
 // Custom
-import { CoreManager } from '../../../managers/coreManager'
-
-// A savefileId holder to add move save data to other files.
-DataManager.currentSave = ''
+import { CoreManager, fileExtention } from '../../../managers/coreManager'
 
 // EDIT: globalInfo returned from electron can be false, since it is not rejected on electron side.
 DataManager.loadGlobalInfo = function () {
@@ -23,11 +20,19 @@ DataManager.loadGlobalInfo = function () {
 }
 
 DataManager.saveGame = function (savefileId) {
-  this.currentSave = savefileId
-
   const contents = this.makeSaveContents()
   const saveName = this.makeSavename(savefileId)
-  return StorageManager.saveObject(saveName, contents).then(() => {
+
+  const dataTask = {
+    savefileId: saveName,
+    extention: fileExtention,
+    contents,
+    task: 'save'
+  }
+
+  CoreManager.registerDataTask(dataTask)
+
+  return CoreManager.executeDataTasks('save').then(() => {
     this._globalInfo[savefileId] = this.makeSavefileInfo()
     this.saveGlobalInfo()
     return true
@@ -35,15 +40,31 @@ DataManager.saveGame = function (savefileId) {
 }
 
 DataManager.loadGame = function (savefileId) {
-  this.currentSave = savefileId
-
   const saveName = this.makeSavename(savefileId)
-  return StorageManager.loadObject(saveName).then((contents) => {
-    this.createGameObjects()
-    this.extractSaveContents(contents)
-    this.correctDataErrors()
-    return true
-  })
+
+  const dataTask = {
+    savefileId: saveName,
+    extention: fileExtention,
+    task: 'load',
+    thenCallback: (contents) => {
+      window.DataManager.createGameObjects()
+      window.DataManager.extractSaveContents(contents)
+      window.DataManager.correctDataErrors()
+      return true
+    }
+  }
+
+  CoreManager.registerDataTask(dataTask)
+
+  return CoreManager.executeDataTasks('load')
+    .then((resp) => {
+      if (resp) return true
+      return false
+    })
+    .catch((e) => {
+      console.log(e)
+      return false
+    })
 }
 
 // EDIT: Have to send the filename to the electron side and
@@ -53,7 +74,7 @@ DataManager.removeInvalidGlobalInfo = function () {
   for (const info of globalInfo) {
     const savefileId = globalInfo.indexOf(info)
     const saveFileName = this.makeSavename(savefileId)
-    CoreManager.fileExists(...StorageManager.filePath(saveFileName))
+    CoreManager.fileExists('save', saveFileName + '.' + fileExtention)
       .then((resp) => {
         if (!resp) {
           delete globalInfo[savefileId]

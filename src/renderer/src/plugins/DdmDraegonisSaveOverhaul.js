@@ -1,4 +1,4 @@
-import { CoreManager } from '../managers/coreManager'
+import { CoreManager, fileExtention } from '../managers/coreManager'
 import { addNewInput } from '../store/inputs/useInputStore'
 
 // ================================================
@@ -103,7 +103,7 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
     // savefileId is the same as the saveFileName
     const savefileId = info.savefileId
     // Changed logic to make sure it runs in order.
-    const isSave = await CoreManager.fileExists(...CoreManager.gameSavePath(savefileId))
+    const isSave = await CoreManager.fileExists('save', savefileId + '.' + fileExtention)
 
     const infoIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
 
@@ -270,26 +270,46 @@ window.DataManager.savefileInfo = function (savefileId) {
 }
 
 window.DataManager.saveGame = function (savefileId) {
-  this.currentSave = savefileId
-
   const contents = this.makeSaveContents()
-  const saveName = savefileId
-  return StorageManager.saveObject(saveName, contents).then(() => {
-    makeGlobalInfoSave(savefileId, this)
+
+  const dataTask = {
+    savefileId,
+    extention: fileExtention,
+    contents,
+    task: 'save'
+  }
+
+  CoreManager.registerDataTask(dataTask)
+
+  return CoreManager.executeDataTasks('save').then(() => {
+    makeGlobalInfoSave(savefileId, window.DataManager)
     return true
   })
 }
 
 window.DataManager.loadGame = function (savefileId) {
-  this.currentSave = savefileId
+  const dataTask = {
+    savefileId,
+    extention: fileExtention,
+    task: 'load',
+    thenCallback: (contents) => {
+      window.DataManager.createGameObjects()
+      window.DataManager.extractSaveContents(contents)
+      window.DataManager.correctDataErrors()
+      return true
+    }
+  }
 
-  const saveName = savefileId
-  return StorageManager.loadObject(saveName).then((contents) => {
-    this.createGameObjects()
-    this.extractSaveContents(contents)
-    this.correctDataErrors()
-    return true
-  })
+  CoreManager.registerDataTask(dataTask)
+
+  return CoreManager.executeDataTasks('load')
+    .then((resp) => {
+      if (resp) return true
+      return false
+    })
+    .catch(() => {
+      return false
+    })
 }
 
 // add new entries into the info saved to globalInfo array.
