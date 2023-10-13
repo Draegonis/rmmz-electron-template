@@ -23,6 +23,10 @@ const makeGlobalInfoSave = function (saveId, dataManager) {
     dataManager._globalInfo.unshift(newInfo)
   }
 
+  if (newInfo.saveType === 'Autosave' || newInfo.saveType === 'Quicksave') {
+    dataManager.setLastSave(newInfo.saveType, newInfo.saveNumber)
+  }
+
   dataManager.saveGlobalInfo()
 }
 
@@ -32,18 +36,17 @@ const makeSavefileId = function (saveType) {
   const dataManager = window.DataManager
   let savefileId = ''
 
-  const lastSave = dataManager.returnLast(saveType)
+  const lastSave = dataManager.returnLastSave(saveType)
   const currentSaveNum = dataManager.returnSavesNum(saveType)
   const maxSaves = dataManager.returnMaxSaves(saveType)
 
-  if (lastSave === `${saveType}-${maxSaves}`) {
+  if (lastSave === maxSaves) {
     savefileId = `${saveType}-1`
-  } else if (lastSave === '') {
+  } else if (!lastSave) {
     savefileId = `${saveType}-1`
     dataManager.incrementSavesNum(saveType)
   } else {
-    let saveNumber = Number(lastSave.split('-')[1])
-    saveNumber++
+    const saveNumber = lastSave + 1
     if (currentSaveNum < maxSaves) dataManager.incrementSavesNum(saveType)
     savefileId = `${saveType}-${saveNumber}`
   }
@@ -81,8 +84,8 @@ addNewInput({ quickload: { keyCode: 119 }, quicksave: { keyCode: 116 } })
 window.DataManager.isQuicksaving = false
 window.DataManager.isQuickloading = false
 
-window.DataManager.lastAutosave = ''
-window.DataManager.lastQuicksave = ''
+window.DataManager.lastAutosave = undefined
+window.DataManager.lastQuicksave = undefined
 
 window.DataManager._numOfAutosaves = 0
 window.DataManager._numOfQuicksaves = 0
@@ -110,14 +113,13 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
     if (!isSave) {
       removeIndex.push(infoIndex)
     } else {
+      if (info.saveType === 'Autosave' || info.saveType === 'Quicksave') {
+        const lastSave = this.returnLastSave(info.saveType)
+        if (!lastSave) this.setLastSave(info.saveType, info.saveNumber)
+      }
       // this is to track the number of saves of a type.
       this.incrementSavesNum(info.saveType)
     }
-
-    if (!window.DataManager.lastQuicksave && info.saveType === 'Quicksave')
-      window.DataManager.lastQuicksave = info.savefileId
-    if (!window.DataManager.lastAutosave && info.saveType === 'Autosave')
-      window.DataManager.lastAutosave = info.saveType
   }
 
   if (removeIndex.length > 0) {
@@ -251,14 +253,21 @@ window.DataManager.decrementSavesNum = function (saveType) {
   }
 }
 
-window.DataManager.returnLast = function (saveType) {
+window.DataManager.setLastSave = function (saveType, saveNumber) {
+  switch (saveType) {
+    case 'Autosave':
+      return (this.lastAutosave = saveNumber)
+    case 'Quicksave':
+      return (this.lastQuicksave = saveNumber)
+  }
+}
+
+window.DataManager.returnLastSave = function (saveType) {
   switch (saveType) {
     case 'Autosave':
       return this.lastAutosave
     case 'Quicksave':
       return this.lastQuicksave
-    default:
-      return undefined
   }
 }
 
@@ -316,7 +325,7 @@ window.DataManager.loadGame = function (savefileId) {
 // saveType === 'Autosave' | 'Quicksave' | 'Hardsave'
 // savefileId is used to find the index/info in globalInfo array.
 window.DataManager.makeSavefileInfo = function (savefileId) {
-  const saveType = savefileId.split('-')[0]
+  const [saveType, saveNumber] = savefileId.split('-')
   const info = {}
   info.title = window.$dataSystem.gameTitle
   info.characters = window.$gameParty.charactersForSavefile()
@@ -324,6 +333,7 @@ window.DataManager.makeSavefileInfo = function (savefileId) {
   info.playtime = window.$gameSystem.playtimeText()
   info.timestamp = Date.now()
   info.saveType = saveType
+  info.saveNumber = Number(saveNumber)
   info.savefileId = savefileId
   return info
 }
@@ -544,8 +554,9 @@ window.Scene_Map.prototype.quickSave = async function () {
 
 // New function for Scene_Map to perform quickloads.
 window.Scene_Map.prototype.quickload = function () {
-  if (window.DataManager.lastQuicksave === '') return
-  const savefileId = window.DataManager.lastQuicksave
+  if (window.DataManager.lastQuicksave === undefined) return
+
+  const savefileId = `Quicksave-${window.DataManager.lastQuicksave}`
 
   this.quickloadFade()
 
