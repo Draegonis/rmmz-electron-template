@@ -33,6 +33,8 @@ if (import.meta.env.DEV) {
   }
 }
 
+window.INDICATORS = window.INDICATORS || {}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RMMZinject />

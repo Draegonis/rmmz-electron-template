@@ -3,6 +3,30 @@ export const fileExtention = 'rmmzsave'
 class Ddm_CoreManager {
   #dataPromises = [] // promise array to pass into Promise.all
 
+  #startTask(mode) {
+    if (!window.INDICATORS) return
+    switch (mode) {
+      case 'save':
+        window.INDICATORS.startSaveIndicator()
+        break
+      case 'load':
+        window.INDICATORS.startLoadIndicator()
+        break
+    }
+  }
+
+  #endTask(mode) {
+    if (!window.INDICATORS) return
+    switch (mode) {
+      case 'save':
+        window.INDICATORS.endSaveIndicator()
+        break
+      case 'load':
+        window.INDICATORS.endLoadIndicator()
+        break
+    }
+  }
+
   async fileExists(folder, file) {
     return await window.electron.ipcRenderer.invoke('file-exists', folder, file)
   }
@@ -47,6 +71,8 @@ class Ddm_CoreManager {
   }
 
   async executeDataTasks(mode) {
+    this.#startTask(mode)
+
     const isDone = await Promise.all(
       this.#dataPromises.map(
         ({ savefileId, extention, task, contents, thenCallback, catchCallback }) =>
@@ -82,6 +108,8 @@ class Ddm_CoreManager {
     }
 
     this.#dataPromises.length = 0
+
+    this.#endTask(mode)
 
     return isAllTrue
   }
