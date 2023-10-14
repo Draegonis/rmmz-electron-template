@@ -1,7 +1,7 @@
 {
   "name": "rmmz-electron-template",
   "productName": "Rmmz Electron Template",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A template that will allow you to deploy your Rpg Maker MZ game as an electron app.",
   "main": "./out/main/index.js",
   "author": "DdmDraegonis",
@@ -27,6 +27,10 @@
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.1",
     "@electron-toolkit/eslint-config-prettier": "^1.0.1",
+    "@types/ramda": "^0.29.6",
+    "@types/react-dom": "^18.2.13",
+    "@types/styled-components": "^5.1.28",
+    "@types/uuid": "^9.0.5",
     "@vitejs/plugin-react": "^4.1.0",
     "electron": "^26.2.4",
     "electron-builder": "^24.6.4",
@@ -44,6 +48,8 @@
     "ramda": "^0.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-spinners": "^0.13.8",
+    "styled-components": "^6.0.9",
     "uuid": "^9.0.1",
     "vite": "^4.4.9",
     "zustand": "^4.4.1"

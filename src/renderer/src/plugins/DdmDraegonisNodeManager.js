@@ -7,6 +7,8 @@ import { setGameVars } from '../helpers/gameFuncs'
 import { parseBoolean, parseNumber, parseSelfSW } from '../helpers/gameParsers'
 import { v4 as uuidV4 } from 'uuid'
 
+const fileExtention = 'nodeData'
+
 // ==============================================================
 // PLUGIN SETUP
 
@@ -161,7 +163,7 @@ class DdmNodeManager {
   /**
    * The method called to setup the save data for the save file.
    */
-  async onSave() {
+  onSave() {
     const saveData = {
       nodeEvents: this.#tickEvents,
       nodeTracked: this.#trackedEvents
@@ -172,15 +174,15 @@ class DdmNodeManager {
       tick: this.#tick
     })
 
-    await CoreManager.saveToFile(...this.#savePath(), saveData, true)
+    return saveData
   }
   /**
    * The method called to load data from the save file.
    */
-  async onLoad() {
+  onLoad(savedData) {
     this.clearEvents()
 
-    const { nodeEvents, nodeTracked } = await CoreManager.loadFromFile(...this.#savePath(), true)
+    const { nodeEvents, nodeTracked } = savedData
 
     const gameTick = nodeEvents.pop()
     if (gameTick) {
@@ -375,33 +377,40 @@ window.Scene_Title.prototype.create = function () {
   DDM_ALIAS_SCENE_TITLE_CREATE.call(this)
   NodeManager.clearEvents()
   // You can setup a stress test here.
-  // NodeManager.stressTest(30000, 300, true)
+  NodeManager.stressTest(30000, 300, true)
 }
 
-if (window.Imported.DdmDraegonisSaveOverhaul) {
-  const DDM_ALIAS_SCENE_MAP_ONQUICKSAVESUCCESS = window.Scene_Map.prototype.onQuicksaveSuccess
-  window.Scene_Map.prototype.onQuicksaveSuccess = function () {
-    DDM_ALIAS_SCENE_MAP_ONQUICKSAVESUCCESS.call(this)
-    NodeManager.onSave()
+const DDM_ALIAS_DATAMANAGER_SAVEGAME = window.DataManager.saveGame
+window.DataManager.saveGame = function (savefileId) {
+  const contents = NodeManager.onSave()
+
+  const dataTask = {
+    savefileId,
+    extention: fileExtention,
+    contents,
+    task: 'save'
   }
 
-  const DDM_ALIAS_SCENE_MAP_ONQUICKLOADSUCCESS = window.Scene_Map.prototype.onQuickloadSuccess
-  window.Scene_Map.prototype.onQuickloadSuccess = function () {
-    DDM_ALIAS_SCENE_MAP_ONQUICKLOADSUCCESS.call(this)
-    NodeManager.onLoad()
+  CoreManager.registerDataTask(dataTask)
+
+  return DDM_ALIAS_DATAMANAGER_SAVEGAME.call(this, savefileId)
+}
+
+const DDM_ALIAS_DATAMANAGER_LOADGAME = window.DataManager.loadGame
+window.DataManager.loadGame = function (savefileId) {
+  const dataTask = {
+    savefileId,
+    extention: fileExtention,
+    task: 'load',
+    thenCallback: (contents) => {
+      NodeManager.onLoad(contents)
+      return true
+    }
   }
-}
 
-const DDM_ALIAS_SCENE_SAVE_ONSAVESUCCESS = window.Scene_Save.prototype.onSaveSuccess
-window.Scene_Save.prototype.onSaveSuccess = function () {
-  DDM_ALIAS_SCENE_SAVE_ONSAVESUCCESS.call(this)
-  NodeManager.onSave()
-}
+  CoreManager.registerDataTask(dataTask)
 
-const DDM_ALIAS_SCENE_LOAD_ONLOADSUCCESS = window.Scene_Load.prototype.onLoadSuccess
-window.Scene_Load.prototype.onLoadSuccess = function () {
-  DDM_ALIAS_SCENE_LOAD_ONLOADSUCCESS.call(this)
-  NodeManager.onLoad()
+  return DDM_ALIAS_DATAMANAGER_LOADGAME.call(this, savefileId)
 }
 
 // ==================================================================
