@@ -1,61 +1,6 @@
 import { CoreManager, fileExtention } from '../managers/coreManager'
 import { addNewInput } from '../store/inputs/useInputStore'
-
-// ================================================
-// Helpers
-
-// This handles shifting the save to the first index of globalInfo, and saves globalInfo
-const makeGlobalInfoSave = function (saveId, dataManager) {
-  const fileIndex = dataManager._globalInfo.findIndex((file) => file.savefileId === saveId)
-
-  const newInfo = dataManager.makeSavefileInfo(saveId)
-
-  if (fileIndex > 0) {
-    // if fileIndex is > 0, remove it from the globalInfo array and place a new entry at the front
-    // of the array.
-    dataManager._globalInfo.splice(fileIndex, 1)
-    dataManager._globalInfo.unshift(newInfo)
-  } else if (fileIndex === 0) {
-    // if fileIndex is 0, update the first entry.
-    dataManager._globalInfo[0] = newInfo
-  } else {
-    // if fileIndex = -1 only add the new entry in front of the globalInfo array.
-    dataManager._globalInfo.unshift(newInfo)
-  }
-
-  if (newInfo.saveType === 'Autosave' || newInfo.saveType === 'Quicksave') {
-    dataManager.setLastSave(newInfo.saveType, newInfo.saveNumber)
-  }
-
-  dataManager.saveGlobalInfo()
-}
-
-// Used for Autosave and Quicksave in order to create the savefileId
-// and increment the current number of saves if needed.
-const makeSavefileId = function (saveType) {
-  const dataManager = window.DataManager
-  let savefileId = ''
-
-  const lastSave = dataManager.returnLastSave(saveType)
-  const currentSaveNum = dataManager.returnSavesNum(saveType)
-  const maxSaves = dataManager.returnMaxSaves(saveType)
-
-  if (lastSave === maxSaves) {
-    savefileId = `${saveType}-1`
-  } else if (!lastSave) {
-    savefileId = `${saveType}-1`
-    dataManager.incrementSavesNum(saveType)
-  } else {
-    const saveNumber = lastSave + 1
-    if (currentSaveNum < maxSaves) dataManager.incrementSavesNum(saveType)
-    savefileId = `${saveType}-${saveNumber}`
-  }
-
-  return savefileId
-}
-
-// ************************************************
-// ================================================
+import { parseBoolean, parseNumber } from '../helpers/gameParsers'
 
 // ================================================
 // Setup/Params
@@ -68,9 +13,13 @@ window.Imported[pluginName] = 1.0
 const emptySlotName = 'Empty Save Slot'
 
 const params = window.PluginManager.parameters(pluginName)
-const enableAutosave = params.enable_autosave === 'true'
-const maxAutoSaves = Number(params.maxAutosaves || 5)
-const maxQuicksaves = Number(params.maxQuicksaves || 5)
+const enableAutosave = parseBoolean(params.enable_Autosave)
+const enableQuicksave = parseBoolean(params.enable_Quicksave)
+const enableHardsave = parseBoolean(params.enable_Hardsave)
+const allowOverwrites = parseBoolean(params.allowOverwrites)
+const maxAutoSaves = parseNumber(params.maxAutosaves, 5)
+const maxQuicksaves = parseNumber(params.maxQuicksaves, 5)
+const maxHardsaves = parseNumber(params.maxHardsaves, 20)
 
 addNewInput({ quickload: { keyCode: 119 }, quicksave: { keyCode: 116 } })
 
@@ -84,127 +33,44 @@ addNewInput({ quickload: { keyCode: 119 }, quicksave: { keyCode: 116 } })
 window.DataManager.isQuicksaving = false
 window.DataManager.isQuickloading = false
 
+// ================================================
+// Handle last save.
+
 window.DataManager.lastAutosave = undefined
 window.DataManager.lastQuicksave = undefined
+
+window.DataManager.setLastSave = function (saveType, saveNumber) {
+  switch (saveType) {
+    case 'Autosave':
+      return (this.lastAutosave = saveNumber)
+    case 'Quicksave':
+      return (this.lastQuicksave = saveNumber)
+  }
+}
+
+window.DataManager.returnLastSave = function (saveType) {
+  switch (saveType) {
+    case 'Autosave':
+      return this.lastAutosave
+    case 'Quicksave':
+      return this.lastQuicksave
+  }
+}
+
+// ================================================
+// Handle current saves.
 
 window.DataManager._numOfAutosaves = 0
 window.DataManager._numOfQuicksaves = 0
 window.DataManager._numOfHardsaves = 0
 
-window.DataManager._maxAutoSaves = maxAutoSaves > 0 ? maxAutoSaves : 1
-window.DataManager._maxQuicksaves = maxQuicksaves > 0 ? maxQuicksaves : 1
-window.DataManager._maxHardsaves = 20
-
-// This is no longer used.
-delete window.DataManager.makeSavename
-
-// Have to send the filename to the electron side and
-// the return if it fails triggers the delete globalInfo.
-window.DataManager.removeInvalidGlobalInfo = async function () {
-  const removeIndex = []
-  for await (const info of this._globalInfo) {
-    // savefileId is the same as the saveFileName
-    const savefileId = info.savefileId
-    // Changed logic to make sure it runs in order.
-    const isSave = await CoreManager.fileExists('save', savefileId + '.' + fileExtention)
-
-    const infoIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
-
-    if (!isSave) {
-      removeIndex.push(infoIndex)
-    } else {
-      if (info.saveType === 'Autosave' || info.saveType === 'Quicksave') {
-        const lastSave = this.returnLastSave(info.saveType)
-        if (!lastSave) this.setLastSave(info.saveType, info.saveNumber)
-      }
-      // this is to track the number of saves of a type.
-      this.incrementSavesNum(info.saveType)
-    }
-  }
-
-  if (removeIndex.length > 0) {
-    // filters based on indexes.
-    const filteredGlobalInfo = this._globalInfo.filter((_, index) => {
-      let keep = true
-      removeIndex.forEach((toRemove) => {
-        if (toRemove === index) keep = false
-      })
-      return keep
-    })
-    // clear globalInfo array and set the new filtered one.
-    this._globalInfo.length = 0
-    this._globalInfo = filteredGlobalInfo
-    // save the new global info.
-    window.DataManager.saveGlobalInfo()
-  }
-}
-
-// lastest save is always index 0 savefileId.
-window.DataManager.latestSavefileId = function () {
-  return this._globalInfo[0].savefileId
-}
-
-// This is no longer used.
-delete window.DataManager.earliestSavefileId
-
-// removed selectSavefileForNewGame as it is no longer needed.
-// New saves are automatically added in front of the globalInfo array.
-window.DataManager.setupNewGame = function () {
-  this.createGameObjects()
-  window.$gameParty.setupStartingMembers()
-  window.$gamePlayer.setupForNewGame()
-  window.Graphics.frameCount = 0
-}
-delete window.DataManager.selectSavefileForNewGame
-delete window.DataManager.emptySavefileId
-
-// Add in the max autosaves + quicksaves.
-window.DataManager.maxSavefiles = function () {
-  return this.maxHardsaves() + this.maxAutoSaves() + this.maxQuickSaves()
-}
-
-// new function to return the max saves based on the type given.
-window.DataManager.returnMaxSaves = function (saveType) {
-  switch (saveType) {
-    case 'Autosave':
-      return this.maxAutoSaves()
-    case 'Quicksave':
-      return this.maxQuickSaves()
-    case 'Hardsave':
-      return this.maxHardsaves()
-    default:
-      return -1
-  }
-}
-
-// new, the amount of autosaves in the rotation.
-window.DataManager.maxAutoSaves = function () {
-  return enableAutosave ? this._maxAutoSaves : 0
-}
-
-// new, the amount of quicksaves in the rotation.
-window.DataManager.maxQuickSaves = function () {
-  return this._maxQuicksaves
-}
-
-// new, the max amount of hardsaves.
-window.DataManager.maxHardsaves = function () {
-  return this._maxHardsaves
-}
-
-// new function to get the current total of saves.
-window.DataManager.currentTotalSavesNum = function () {
-  const autoSaveCount = enableAutosave ? this._numOfAutosaves : 0
-  return autoSaveCount + this._numOfQuicksaves + this._numOfHardsaves
-}
-
 // This is mostly for Hardsave since Autosave and Quicksave cycle through it's kinda pointless to use for them.
-window.DataManager.nextEmptySaveNumber = function (saveType) {
+window.DataManager.nextEmptyHardsave = function () {
   let saveTest = 1
   let returnNum = 0
   let testing = true
   do {
-    const testInfo = this._globalInfo.find((info) => info.savefileId === `${saveType}-${saveTest}`)
+    const testInfo = this._globalInfo.find((info) => info.savefileId === `Hardsave-${saveTest}`)
     if (!testInfo) {
       returnNum = saveTest
       testing = false
@@ -253,29 +119,139 @@ window.DataManager.decrementSavesNum = function (saveType) {
   }
 }
 
-window.DataManager.setLastSave = function (saveType, saveNumber) {
+// new function to get the current total of saves.
+window.DataManager.currentTotalSavesNum = function () {
+  const autoSaveCount = enableAutosave ? this._numOfAutosaves : 0
+  return autoSaveCount + this._numOfQuicksaves + this._numOfHardsaves
+}
+
+// ================================================
+// Handle max saves.
+
+window.DataManager._maxAutoSaves = enableAutosave ? (maxAutoSaves > 0 ? maxAutoSaves : 1) : 0
+window.DataManager._maxQuicksaves = enableQuicksave ? (maxQuicksaves > 0 ? maxQuicksaves : 1) : 0
+window.DataManager._maxHardsaves = enableHardsave ? (maxHardsaves > 0 ? maxHardsaves : 1) : 0
+
+// Add in the max autosaves + quicksaves.
+window.DataManager.maxSavefiles = function () {
+  return this.maxHardsaves() + this.maxAutoSaves() + this.maxQuickSaves()
+}
+
+// new function to return the max saves based on the type given.
+window.DataManager.returnMaxSaves = function (saveType) {
   switch (saveType) {
     case 'Autosave':
-      return (this.lastAutosave = saveNumber)
+      return this.maxAutoSaves()
     case 'Quicksave':
-      return (this.lastQuicksave = saveNumber)
+      return this.maxQuickSaves()
+    case 'Hardsave':
+      return this.maxHardsaves()
+    default:
+      return -1
   }
 }
 
-window.DataManager.returnLastSave = function (saveType) {
-  switch (saveType) {
-    case 'Autosave':
-      return this.lastAutosave
-    case 'Quicksave':
-      return this.lastQuicksave
+// new, the amount of autosaves in the rotation.
+window.DataManager.maxAutoSaves = function () {
+  return this._maxAutoSaves
+}
+
+// new, the amount of quicksaves in the rotation.
+window.DataManager.maxQuickSaves = function () {
+  return this._maxQuicksaves
+}
+
+// new, the max amount of hardsaves.
+window.DataManager.maxHardsaves = function () {
+  return this._maxHardsaves
+}
+
+// These are no longer used.
+delete window.DataManager.makeSavename
+delete window.DataManager.earliestSavefileId
+delete window.DataManager.selectSavefileForNewGame
+delete window.DataManager.emptySavefileId
+
+// ======================================
+// Handle Globalinfo
+
+// This handles shifting the save to the first index of globalInfo, and saves globalInfo
+const makeGlobalInfoSave = function (saveId, dataManager) {
+  const fileIndex = dataManager._globalInfo.findIndex((file) => file.savefileId === saveId)
+
+  const newInfo = dataManager.makeSavefileInfo(saveId)
+
+  if (fileIndex > 0) {
+    // if fileIndex is > 0, remove it from the globalInfo array and place a new entry at the front
+    // of the array.
+    dataManager._globalInfo.splice(fileIndex, 1)
+    dataManager._globalInfo.unshift(newInfo)
+  } else if (fileIndex === 0) {
+    // if fileIndex is 0, update the first entry.
+    dataManager._globalInfo[0] = newInfo
+  } else {
+    // if fileIndex = -1 only add the new entry in front of the globalInfo array.
+    dataManager._globalInfo.unshift(newInfo)
+  }
+
+  if (newInfo.saveType === 'Autosave' || newInfo.saveType === 'Quicksave') {
+    dataManager.setLastSave(newInfo.saveType, newInfo.saveNumber)
+  }
+
+  dataManager.saveGlobalInfo()
+}
+
+// Have to send the filename to the electron side and
+// the return if it fails triggers the delete globalInfo.
+window.DataManager.removeInvalidGlobalInfo = async function () {
+  const removeIndex = []
+  for await (const info of this._globalInfo) {
+    // savefileId is the same as the saveFileName
+    const savefileId = info.savefileId
+    // Changed logic to make sure it runs in order.
+    const isSave = await CoreManager.fileExists('save', savefileId + '.' + fileExtention)
+
+    const infoIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
+
+    if (!isSave) {
+      removeIndex.push(infoIndex)
+    } else {
+      if (info.saveType === 'Autosave' || info.saveType === 'Quicksave') {
+        const lastSave = this.returnLastSave(info.saveType)
+        if (!lastSave) this.setLastSave(info.saveType, info.saveNumber)
+      }
+      // this is to track the number of saves of a type.
+      this.incrementSavesNum(info.saveType)
+    }
+  }
+
+  if (removeIndex.length > 0) {
+    // filters based on indexes.
+    const filteredGlobalInfo = this._globalInfo.filter((_, index) => {
+      let keep = true
+      removeIndex.forEach((toRemove) => {
+        if (toRemove === index) keep = false
+      })
+      return keep
+    })
+    // clear globalInfo array and set the new filtered one.
+    this._globalInfo.length = 0
+    this._globalInfo = filteredGlobalInfo
+    // save the new global info.
+    window.DataManager.saveGlobalInfo()
   }
 }
 
-window.DataManager.savefileInfo = function (savefileId) {
-  const globalInfo = this._globalInfo
-  // change because savefileId is no longer an int to index globalInfo.
-  const saveInfo = globalInfo.find((info) => info.savefileId === savefileId)
-  return saveInfo ? saveInfo : null
+// ======================================
+// Handle NewGame/saveGame/loadGame
+
+// removed selectSavefileForNewGame as it is no longer needed.
+// New saves are automatically added in front of the globalInfo array.
+window.DataManager.setupNewGame = function () {
+  this.createGameObjects()
+  window.$gameParty.setupStartingMembers()
+  window.$gamePlayer.setupForNewGame()
+  window.Graphics.frameCount = 0
 }
 
 window.DataManager.saveGame = function (savefileId) {
@@ -321,6 +297,45 @@ window.DataManager.loadGame = function (savefileId) {
     })
 }
 
+// ======================================
+// Handle savefileId and save file info.
+
+// lastest save is always index 0 savefileId.
+window.DataManager.latestSavefileId = function () {
+  return this._globalInfo[0].savefileId
+}
+
+window.DataManager.savefileInfo = function (savefileId) {
+  const globalInfo = this._globalInfo
+  // change because savefileId is no longer an int to index globalInfo.
+  const saveInfo = globalInfo.find((info) => info.savefileId === savefileId)
+  return saveInfo ? saveInfo : null
+}
+
+// Used for Autosave and Quicksave in order to create the savefileId
+// and increment the current number of saves if needed.
+const makeSavefileId = function (saveType) {
+  const dataManager = window.DataManager
+  let savefileId = ''
+
+  const lastSave = dataManager.returnLastSave(saveType)
+  const currentSaveNum = dataManager.returnSavesNum(saveType)
+  const maxSaves = dataManager.returnMaxSaves(saveType)
+
+  if (lastSave === maxSaves) {
+    savefileId = `${saveType}-1`
+  } else if (!lastSave) {
+    savefileId = `${saveType}-1`
+    dataManager.incrementSavesNum(saveType)
+  } else {
+    const saveNumber = lastSave + 1
+    if (currentSaveNum < maxSaves) dataManager.incrementSavesNum(saveType)
+    savefileId = `${saveType}-${saveNumber}`
+  }
+
+  return savefileId
+}
+
 // add new entries into the info saved to globalInfo array.
 // saveType === 'Autosave' | 'Quicksave' | 'Hardsave'
 // savefileId is used to find the index/info in globalInfo array.
@@ -342,6 +357,18 @@ window.DataManager.makeSavefileInfo = function (savefileId) {
 // ================================================
 
 // ================================================
+// Window_MenuCommand
+
+// Overwrite if hardsaves are disabled make it so you can't
+// open Scene_Save in the menu.
+window.Window_MenuCommand.prototype.addSaveCommand = function () {
+  if (this.needsCommand('save')) {
+    const enabled = this.isSaveEnabled()
+    if (enableHardsave || allowOverwrites) this.addCommand(window.TextManager.save, 'save', enabled)
+  }
+}
+
+// ================================================
 // Window_SavefileList
 
 window.Window_SavefileList.prototype.initialize = function (rect) {
@@ -357,12 +384,13 @@ window.Window_SavefileList.prototype.setMode = function (mode) {
 
 // EDIT: change to the currentTotalSaves (autosave doesn't effect index anymore)
 window.Window_SavefileList.prototype.maxItems = function () {
-  if (window.DataManager._numOfHardsaves === window.DataManager.maxHardsaves()) {
-    // Prevent adding hard saves if the max is reached.
+  if (window.DataManager._numOfHardsaves === window.DataManager.maxHardsaves() || !enableHardsave) {
+    // Prevent adding hard saves if the max is reached or hard saves are not enabled.
     return window.DataManager.currentTotalSavesNum()
   } else {
     // the + 1 should show as Empty Save Slot.
-    if (this._mode === 'save') return window.DataManager.currentTotalSavesNum() + 1
+    if (this._mode === 'save' && enableHardsave)
+      return window.DataManager.currentTotalSavesNum() + 1
     if (this._mode === 'load') return window.DataManager.currentTotalSavesNum()
   }
 }
@@ -378,9 +406,12 @@ window.Window_SavefileList.prototype.indexToSavefileId = function (index) {
 // Make it so you can't save over autosaves and quicksaves manually.
 window.Window_SavefileList.prototype.isEnabled = function (savefileId) {
   if (this._mode === 'save') {
+    if (allowOverwrites) return true
+
     if (savefileId.includes('Autosave') || savefileId.includes('Quicksave')) {
       return false
     }
+
     return true
   } else {
     return !!window.DataManager.savefileInfo(savefileId)
@@ -410,7 +441,8 @@ window.Scene_Base.prototype.isAutosaveEnabled = function () {
     !window.DataManager.isBattleTest() &&
     !window.DataManager.isEventTest() &&
     enableAutosave &&
-    window.$gameSystem.isSaveEnabled()
+    window.$gameSystem.isSaveEnabled() &&
+    window.ConfigManager.enableAutosaving
   )
 }
 
@@ -437,6 +469,43 @@ window.Scene_Base.prototype.executeAutosave = function () {
 
 // ************************************************
 // ================================================
+
+// ================================================
+// ConfigManager
+
+// Add a player option to enable or disable autosaving and quicksaving.
+
+if (enableAutosave) window.ConfigManager.enableAutosaving = true
+if (enableQuicksave) window.ConfigManager.enableQuicksaving = true
+
+const DDM_ALIAS_CONFIGMANAGER_MAKEDATA = window.ConfigManager.makeData
+window.ConfigManager.makeData = function () {
+  const config = DDM_ALIAS_CONFIGMANAGER_MAKEDATA.call(this)
+
+  if (enableAutosave) config.enableAutosaving = this.enableAutosaving
+  if (enableQuicksave) config.enableQuicksaving = this.enableQuicksaving
+
+  return config
+}
+
+const DDM_ALIAS_CONFIGMANAGE_APPLYDATA = window.ConfigManager.applyData
+window.ConfigManager.applyData = function (config) {
+  DDM_ALIAS_CONFIGMANAGE_APPLYDATA.call(this, config)
+
+  if (enableAutosave) this.enableAutosaving = config.enableAutosaving
+  if (enableQuicksave) this.enableQuicksaving = config.enableQuicksaving
+}
+
+// ================================================
+// Window_Options
+
+// Add in autosave and quicksave options if players don't want to use them.
+const DDM_ALIAS_WINDOW_OPTIONS_MAKECOMMANDLIST = window.Window_Options.prototype.makeCommandList
+window.Window_Options.prototype.makeCommandList = function () {
+  DDM_ALIAS_WINDOW_OPTIONS_MAKECOMMANDLIST.call(this)
+  if (enableAutosave) this.addCommand('Enable Autosaving', 'enableAutosaving')
+  if (enableQuicksave) this.addCommand('Enable Quicksaving', 'enableQuicksaving')
+}
 
 // ================================================
 // Scene_File
@@ -468,7 +537,7 @@ window.Scene_Save.prototype.firstSavefileId = function () {
 window.Scene_Save.prototype.executeSave = function (savefileId) {
   let saveId = savefileId
   if (savefileId === emptySlotName) {
-    const nextNumber = window.DataManager.nextEmptySaveNumber('Hardsave')
+    const nextNumber = window.DataManager.nextEmptyHardsave()
     window.DataManager.incrementSavesNum('Hardsave')
     saveId = `Hardsave-${nextNumber}`
   }
@@ -585,10 +654,10 @@ const DDM_ALIAS_SCENE_MAP_UPDATESCENE = window.Scene_Map.prototype.updateScene
 window.Scene_Map.prototype.updateScene = function () {
   DDM_ALIAS_SCENE_MAP_UPDATESCENE.call(this)
   if (!window.SceneManager.isSceneChanging()) {
-    this.updateQuicksave()
+    if (enableQuicksave && window.ConfigManager.enableQuicksaving) this.updateQuicksave()
   }
   if (!window.SceneManager.isSceneChanging()) {
-    this.updateQuickload()
+    if (enableQuicksave && window.ConfigManager.enableQuicksaving) this.updateQuickload()
   }
 }
 
@@ -620,3 +689,11 @@ window.Scene_Map.prototype.isQuickloadCalled = function () {
 
 // ************************************************
 // ================================================
+
+// ================================================
+// PLUGIN COMMANDS
+
+window.PluginManager.registerCommand(pluginName, 'triggerAutosave', () => {
+  if (enableAutosave && window.ConfigManager.enableAutosaving)
+    window.Scene_Base.prototype.executeAutosave()
+})
