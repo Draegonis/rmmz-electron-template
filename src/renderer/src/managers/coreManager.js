@@ -2,6 +2,7 @@ export const fileExtention = 'rmmzsave'
 
 class Ddm_CoreManager {
   #dataPromises = [] // promise array to pass into Promise.all
+  saveAsFolder = true
 
   #startTask(mode) {
     if (!window.INDICATORS) return
@@ -41,6 +42,7 @@ class Ddm_CoreManager {
 
   #makeDataTask(savefileId, extention, task, contents) {
     const saveName = savefileId + '.' + extention
+    const saveFolder = CoreManager.saveAsFolder ? `save/${savefileId}` : 'save'
 
     return new Promise((resolve, reject) => {
       const thenFunc = (resp) => {
@@ -55,11 +57,13 @@ class Ddm_CoreManager {
 
       switch (task) {
         case 'save':
-          return CoreManager.saveToFile('save', saveName, contents, true)
+          return CoreManager.saveToFile(saveFolder, saveName, contents, true)
             .then(thenFunc)
             .catch(catchFunc)
         case 'load':
-          return CoreManager.loadFromFile('save', saveName, true).then(thenFunc).catch(catchFunc)
+          return CoreManager.loadFromFile(saveFolder, saveName, true)
+            .then(thenFunc)
+            .catch(catchFunc)
         default:
           reject(`The ${task} given for ${saveName} is not valid.`)
       }

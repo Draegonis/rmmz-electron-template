@@ -74,7 +74,8 @@ DataManager.removeInvalidGlobalInfo = function () {
   for (const info of globalInfo) {
     const savefileId = globalInfo.indexOf(info)
     const saveFileName = this.makeSavename(savefileId)
-    CoreManager.fileExists('save', saveFileName + '.' + fileExtention)
+    const saveFolder = CoreManager.saveAsFolder ? `save/${saveFileName}` : 'save'
+    CoreManager.fileExists(saveFolder, saveFileName + '.' + fileExtention)
       .then((resp) => {
         if (!resp) {
           delete globalInfo[savefileId]

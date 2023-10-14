@@ -208,8 +208,9 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
   for await (const info of this._globalInfo) {
     // savefileId is the same as the saveFileName
     const savefileId = info.savefileId
+    const saveFolder = CoreManager.saveAsFolder ? `save/${savefileId}` : 'save'
     // Changed logic to make sure it runs in order.
-    const isSave = await CoreManager.fileExists('save', savefileId + '.' + fileExtention)
+    const isSave = await CoreManager.fileExists(saveFolder, savefileId + '.' + fileExtention)
 
     const infoIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
 
