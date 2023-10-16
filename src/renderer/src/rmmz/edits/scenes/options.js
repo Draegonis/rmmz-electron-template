@@ -7,7 +7,7 @@ import { Window_Text } from '../../custom/windows/utility/text'
 // Helper
 import { equals as r_equals } from 'ramda'
 
-// Edit: Add temp window min size to be compaired when config is saved..
+// Edit: Add temp window min size to be compared when config is saved..
 Scene_Options.prototype.create = function () {
   Scene_MenuBase.prototype.create.call(this)
 
