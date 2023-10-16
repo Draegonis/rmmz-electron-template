@@ -64,7 +64,6 @@ import {
   Sprite_Animation,
   Sprite_AnimationMV,
   Sprite_Balloon,
-  Sprite_Battleback,
   Sprite_Battler,
   Sprite_Button,
   Sprite_Character,
@@ -177,7 +176,8 @@ import {
   Window_TitleCommand,
   Window_GameEnd,
   // Sprites
-  Sprite_Enemy
+  Sprite_Enemy,
+  Sprite_Battleback
 } from './edits/editsIndex'
 //=========================================
 // Import Custom
