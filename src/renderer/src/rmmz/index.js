@@ -60,18 +60,15 @@ import {
   Scene_Status
 } from './rmmz_scenes'
 import {
-  Sprite_Actor,
   Sprite_Animation,
   Sprite_AnimationMV,
   Sprite_Balloon,
-  Sprite_Battleback,
   Sprite_Battler,
   Sprite_Button,
   Sprite_Character,
   Sprite_Clickable,
   Sprite_Damage,
   Sprite_Destination,
-  Sprite_Enemy,
   Sprite_Gauge,
   Sprite_Name,
   Sprite_Picture,
@@ -176,7 +173,11 @@ import {
   Window_MenuCommand,
   Window_Options,
   Window_TitleCommand,
-  Window_GameEnd
+  Window_GameEnd,
+  // Sprites
+  Sprite_Enemy,
+  Sprite_Battleback,
+  Sprite_Actor
 } from './edits/editsIndex'
 //=========================================
 // Import Custom
