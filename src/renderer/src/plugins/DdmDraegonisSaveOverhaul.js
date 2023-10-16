@@ -489,9 +489,9 @@ window.ConfigManager.makeData = function () {
   return config
 }
 
-const DDM_ALIAS_CONFIGMANAGE_APPLYDATA = window.ConfigManager.applyData
+const DDM_ALIAS_CONFIGMANAGER_APPLYDATA = window.ConfigManager.applyData
 window.ConfigManager.applyData = function (config) {
-  DDM_ALIAS_CONFIGMANAGE_APPLYDATA.call(this, config)
+  DDM_ALIAS_CONFIGMANAGER_APPLYDATA.call(this, config)
 
   if (enableAutosave) this.enableAutosaving = config.enableAutosaving
   if (enableQuicksave) this.enableQuicksaving = config.enableQuicksaving

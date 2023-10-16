@@ -320,9 +320,9 @@ window.PluginManager.registerCommand(pluginName, 'saveSingleSelfSwitch', ({ self
 // ==================================================================
 // PLUGIN ALIAS
 
-const DDM_ALIAS_DATAMANGER_SETUPNEWGAME = window.DataManager.setupNewGame
+const DDM_ALIAS_DATAMANAGER_SETUPNEWGAME = window.DataManager.setupNewGame
 window.DataManager.setupNewGame = function () {
-  DDM_ALIAS_DATAMANGER_SETUPNEWGAME.call(this)
+  DDM_ALIAS_DATAMANAGER_SETUPNEWGAME.call(this)
   PersistDataManager.onLoad('')
 }
 
