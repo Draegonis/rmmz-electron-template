@@ -51,11 +51,11 @@ ConfigManager.applyData = function (config) {
 // Edit: Add function to convert sizes to ratios.
 ConfigManager.getScreenRatio = function (width, height) {
   switch ((width, height)) {
-    case (1280, 1024):
+    case (1000, 800):
       return 1.25
     case (1024, 768):
       return 1.33
-    case (1280, 720):
+    case (1024, 576):
       return 1.78
     case (1280, 540):
       return 2.37
@@ -68,11 +68,11 @@ ConfigManager.getScreenRatio = function (width, height) {
 ConfigManager.getSizeByRatio = function (ratio) {
   switch (ratio) {
     case 1.25:
-      return [1280, 1024]
+      return [1000, 800]
     case 1.33:
       return [1024, 768]
     case 1.78:
-      return [1280, 720]
+      return [1024, 576]
     case 2.37:
       return [1280, 540]
     default:
