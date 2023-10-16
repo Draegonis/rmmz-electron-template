@@ -73,7 +73,7 @@ const storeSingleType = (key, state) => {
       }
     }
   }
-  // Settingg the variable/switch/selfSW data to the store.
+  // Setting the variable/switch/selfSW data to the store.
 
   switch (key) {
     case 'var':
