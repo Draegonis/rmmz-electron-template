@@ -178,6 +178,13 @@ ipcMain.handle('load-config', () => {
 })
 
 ipcMain.on('save-config', (_, config) => {
+  // Set the settings variable here to minWidth/minHeight.
+  settings.width = config.window.minWidth
+  settings.minWidth = config.window.minWidth
+  settings.height = config.window.minHeight
+  settings.minHeight = config.window.minHeight
+  // Set the ratio as well.
+  settings.ratio = config.window.ratio
   store.set('settings', config)
 })
 
