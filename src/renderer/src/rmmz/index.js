@@ -71,7 +71,6 @@ import {
   Sprite_Clickable,
   Sprite_Damage,
   Sprite_Destination,
-  Sprite_Enemy,
   Sprite_Gauge,
   Sprite_Name,
   Sprite_Picture,
@@ -176,7 +175,9 @@ import {
   Window_MenuCommand,
   Window_Options,
   Window_TitleCommand,
-  Window_GameEnd
+  Window_GameEnd,
+  // Sprites
+  Sprite_Enemy
 } from './edits/editsIndex'
 //=========================================
 // Import Custom

@@ -40,7 +40,8 @@ import { Window_GameEnd } from './window/gameEnd'
 import { Window_MenuCommand } from './window/menuCommand'
 import { Window_Options } from './window/options'
 import { Window_TitleCommand } from './window/titleCommand'
-
+// Sprite edits
+import { Sprite_Enemy } from './sprite/enemy'
 // Re-export all edits
 export {
   // CORE EDITED
@@ -84,5 +85,7 @@ export {
   Window_GameEnd,
   Window_MenuCommand,
   Window_Options,
-  Window_TitleCommand
+  Window_TitleCommand,
+  // SPRITES EDITED
+  Sprite_Enemy
 }
