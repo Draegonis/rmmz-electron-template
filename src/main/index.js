@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { MacMenu } from './menu'
 // Node Imports
 import { join } from 'path'
-// Stoage/Saving Imports
+// Storage/Saving Imports
 import Store from 'electron-store'
 import { strFromU8, strToU8, compressSync, decompressSync } from 'fflate'
 import jetpack from 'fs-jetpack'
@@ -200,8 +200,8 @@ ipcMain.handle('save-object', (_, folder, fileName, data, toCompress) => {
 
     if (toCompress) {
       const str = JSON.stringify(data)
-      const toConpress = strToU8(str)
-      const compressed = compressSync(toConpress)
+      const toCompress = strToU8(str)
+      const compressed = compressSync(toCompress)
       writeObj = Buffer.from(compressed)
     } else {
       writeObj = data

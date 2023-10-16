@@ -14,7 +14,7 @@ Scene_Menu.prototype.createCommandWindow = function () {
   commandWindow.setHandler('status', this.commandPersonal.bind(this))
   commandWindow.setHandler('formation', this.commandFormation.bind(this))
   commandWindow.setHandler('options', this.commandOptions.bind(this))
-  // Edit: Add option for editting controls.
+  // Edit: Add option for editing controls.
   commandWindow.setHandler('controls', this.commandControls.bind(this))
   commandWindow.setHandler('save', this.commandSave.bind(this))
   commandWindow.setHandler('gameEnd', this.commandGameEnd.bind(this))

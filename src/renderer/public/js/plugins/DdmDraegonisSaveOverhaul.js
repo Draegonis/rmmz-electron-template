@@ -26,7 +26,7 @@
  * @text Allow Overwrites
  * @type boolean
  * @default false
- * @desc This will allow autosaves and quicksaves to be overwriten when in Scene_Save.
+ * @desc This will allow autosaves and quicksaves to be overwritten when in Scene_Save.
  * 
  * @param maxAutosaves
  * @text Max Autosaves
@@ -63,7 +63,7 @@
  * This plugin is to change the save system so the most recent save is always at the top of the list.
  * 
  * It allows for a set number of autosaves that will be cycled through when it saves. Those autosaves
- * can't be overwriten when manually saving.
+ * can't be overwritten when manually saving.
  * 
  * Released under the MIT License.
  */

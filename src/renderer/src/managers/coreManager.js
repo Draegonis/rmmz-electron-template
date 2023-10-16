@@ -1,4 +1,4 @@
-export const fileExtention = 'rmmzsave'
+export const fileExtension = 'rmmzsave'
 
 class Ddm_CoreManager {
   #dataPromises = [] // promise array to pass into Promise.all
@@ -40,8 +40,8 @@ class Ddm_CoreManager {
     return await window.electron.ipcRenderer.invoke('read-object', folder, file, deCompress)
   }
 
-  #makeDataTask(savefileId, extention, task, contents) {
-    const saveName = savefileId + '.' + extention
+  #makeDataTask(savefileId, extension, task, contents) {
+    const saveName = savefileId + '.' + extension
     const saveFolder = CoreManager.saveAsFolder ? `save/${savefileId}` : 'save'
 
     return new Promise((resolve, reject) => {
@@ -79,8 +79,8 @@ class Ddm_CoreManager {
 
     const isDone = await Promise.all(
       this.#dataPromises.map(
-        ({ savefileId, extention, task, contents, thenCallback, catchCallback }) =>
-          this.#makeDataTask(savefileId, extention, task, contents)
+        ({ savefileId, extension, task, contents, thenCallback, catchCallback }) =>
+          this.#makeDataTask(savefileId, extension, task, contents)
             .then((resp) => {
               if (thenCallback) thenCallback(resp)
               return [true, undefined]

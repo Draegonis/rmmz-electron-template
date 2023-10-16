@@ -11,13 +11,13 @@ Designed to use RMMZ Core scripts: 1.7.0 as a base. All the changes/edits/additi
 
 - This project does not support any other RPG Maker version, though it may be possible to edit the Rpg Maker MV core scripts to make it work but that is not part of this project.
 - This project is designed to enhance the deployment of a Rpg Maker MZ game. It is not meant to be a replacement for the engine. Inside the src/renderer/public folder is where you place your Rpg Maker MZ project or web deployment. If you place a project you may want to remove the index.html/package.json/game.rmmzproject in the public folder before packaging. You will need to edit the js files of either a project or web deployment before packaging.
-- There is no garenteed support for 3rd party plugins. Specially ones that are obfuscated, or do not allow edits. Do note that this project does break compatibility with a lot of plugins and will need basic to advanced editting.
+- There is no guaranteed support for 3rd party plugins. Specially ones that are obfuscated, or do not allow edits. Do note that this project does break compatibility with a lot of plugins and will need basic to advanced editing.
 - Files that are already in scr/renderer/public folder are required for the project. You will need to add in and edit files as described below in the Core Script Editing Instructions. Also if you use plugins they will need to be edited similar to the instructions in the Importing plugin js files section #2.
 
 ## What this project is good for
 
-- Allows deployment to windows, mac and linux, with targetted architectures.
-- Allows you to customise the game more using electron.
+- Allows deployment to windows, mac and linux, with targeted architectures.
+- Allows you to customize the game more using electron.
   - Can setup a custom menu bar.
   - Can also have the game in the tray.
   - Can setup multiple windows.
@@ -57,7 +57,7 @@ Designed to use RMMZ Core scripts: 1.7.0 as a base. All the changes/edits/additi
 1. Clone the repository.
 2. Install node.js from https://nodejs.org/en/download
 3. Open the terminal in the cloned project, example: Terminal -> New Terminal in VScode.
-4. Either use npm or install your prefered package manager.
+4. Either use npm or install your preferred package manager.
    - I use yarn and added the yarn lock to the project. It doesn't prevent you from using something different but there may be rare cases where it will cause a bug.
 5. Run the command to install node modules, npm install / yarn install etc.
 6. If you used something other then yarn edit the package.json scripts, to use your package manager.
@@ -272,7 +272,7 @@ All the other files in the libs folder are not used.
 
 ### Install
 
-Replace yarn with your prefered package manager, so if it is npm it would be npm install instead of yarn install. If you do use a different package manager, edit the package.json and change the build:mac, build:win, build:linux scripts from yarn to the one you are using.
+Replace yarn with your preferred package manager, so if it is npm it would be npm install instead of yarn install. If you do use a different package manager, edit the package.json and change the build:mac, build:win, build:linux scripts from yarn to the one you are using.
 
 ```bash
 $ yarn install
@@ -332,7 +332,7 @@ RENDERER_VITE_ISOPTIONVALID="skiptitle"
 
 ## Importing plugin js files as modules.
 
-This is to take advantage of vite modules and also if you want to import packages into a personal plugin. You do not need to import the RMMZ scripts, use the ones on the window object since they are the recent/editted ones.
+This is to take advantage of vite modules and also if you want to import packages into a personal plugin. You do not need to import the RMMZ scripts, use the ones on the window object since they are the recent/edited ones.
 
 1. In the public/js/plugins js file: place this into the comment section for plugin parameters. A couple plugins are included as an example.
 

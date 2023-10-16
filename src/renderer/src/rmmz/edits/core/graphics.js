@@ -68,7 +68,7 @@ Graphics._makeErrorHtml = function (name, message, error) {
   return nameDiv.outerHTML + messageDiv.outerHTML + stackDiv.outerHTML
 }
 
-// EDIT: It is set to always stretch, and removed the keybind to toggle
+// EDIT: It is set to always stretch, and removed the key bind to toggle
 // stretching.
 Graphics._defaultStretchMode = function () {
   return Utils.isNwjs()

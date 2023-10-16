@@ -186,7 +186,7 @@ export const setGameVars = {
   switch: setSwitch,
   selfSW: setSelfSwitch
 }
-export const setGameVarsByRamge = {
+export const setGameVarsByRange = {
   var: setVariablesByRange,
   switch: setSwitchesByRange,
   selfSW: setSelfSwitchByRange

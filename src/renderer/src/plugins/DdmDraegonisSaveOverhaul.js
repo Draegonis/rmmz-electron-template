@@ -1,4 +1,4 @@
-import { CoreManager, fileExtention } from '../managers/coreManager'
+import { CoreManager, fileExtension } from '../managers/coreManager'
 import { addNewInput } from '../store/inputs/useInputStore'
 import { parseBoolean, parseNumber } from '../helpers/gameParsers'
 
@@ -17,7 +17,7 @@ const enableAutosave = parseBoolean(params.enable_Autosave)
 const enableQuicksave = parseBoolean(params.enable_Quicksave)
 const enableHardsave = parseBoolean(params.enable_Hardsave)
 const allowOverwrites = parseBoolean(params.allowOverwrites)
-const maxAutoSaves = parseNumber(params.maxAutosaves, 5)
+const maxAutosaves = parseNumber(params.maxAutosaves, 5)
 const maxQuicksaves = parseNumber(params.maxQuicksaves, 5)
 const maxHardsaves = parseNumber(params.maxHardsaves, 20)
 
@@ -128,20 +128,20 @@ window.DataManager.currentTotalSavesNum = function () {
 // ================================================
 // Handle max saves.
 
-window.DataManager._maxAutoSaves = enableAutosave ? (maxAutoSaves > 0 ? maxAutoSaves : 1) : 0
+window.DataManager._maxAutoSaves = enableAutosave ? (maxAutosaves > 0 ? maxAutosaves : 1) : 0
 window.DataManager._maxQuicksaves = enableQuicksave ? (maxQuicksaves > 0 ? maxQuicksaves : 1) : 0
 window.DataManager._maxHardsaves = enableHardsave ? (maxHardsaves > 0 ? maxHardsaves : 1) : 0
 
 // Add in the max autosaves + quicksaves.
 window.DataManager.maxSavefiles = function () {
-  return this.maxHardsaves() + this.maxAutoSaves() + this.maxQuickSaves()
+  return this.maxHardsaves() + this.maxAutosaves() + this.maxQuickSaves()
 }
 
 // new function to return the max saves based on the type given.
 window.DataManager.returnMaxSaves = function (saveType) {
   switch (saveType) {
     case 'Autosave':
-      return this.maxAutoSaves()
+      return this.maxAutosaves()
     case 'Quicksave':
       return this.maxQuickSaves()
     case 'Hardsave':
@@ -152,7 +152,7 @@ window.DataManager.returnMaxSaves = function (saveType) {
 }
 
 // new, the amount of autosaves in the rotation.
-window.DataManager.maxAutoSaves = function () {
+window.DataManager.maxAutosaves = function () {
   return this._maxAutoSaves
 }
 
@@ -173,7 +173,7 @@ delete window.DataManager.selectSavefileForNewGame
 delete window.DataManager.emptySavefileId
 
 // ======================================
-// Handle Globalinfo
+// Handle GlobalInfo
 
 // This handles shifting the save to the first index of globalInfo, and saves globalInfo
 const makeGlobalInfoSave = function (saveId, dataManager) {
@@ -210,7 +210,7 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
     const savefileId = info.savefileId
     const saveFolder = CoreManager.saveAsFolder ? `save/${savefileId}` : 'save'
     // Changed logic to make sure it runs in order.
-    const isSave = await CoreManager.fileExists(saveFolder, savefileId + '.' + fileExtention)
+    const isSave = await CoreManager.fileExists(saveFolder, savefileId + '.' + fileExtension)
 
     const infoIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
 
@@ -260,7 +260,7 @@ window.DataManager.saveGame = function (savefileId) {
 
   const dataTask = {
     savefileId,
-    extention: fileExtention,
+    extension: fileExtension,
     contents,
     task: 'save'
   }
@@ -276,7 +276,7 @@ window.DataManager.saveGame = function (savefileId) {
 window.DataManager.loadGame = function (savefileId) {
   const dataTask = {
     savefileId,
-    extention: fileExtention,
+    extension: fileExtension,
     task: 'load',
     thenCallback: (contents) => {
       window.DataManager.createGameObjects()
@@ -301,7 +301,7 @@ window.DataManager.loadGame = function (savefileId) {
 // ======================================
 // Handle savefileId and save file info.
 
-// lastest save is always index 0 savefileId.
+// latest save is always index 0 savefileId.
 window.DataManager.latestSavefileId = function () {
   return this._globalInfo[0].savefileId
 }
@@ -489,9 +489,9 @@ window.ConfigManager.makeData = function () {
   return config
 }
 
-const DDM_ALIAS_CONFIGMANAGE_APPLYDATA = window.ConfigManager.applyData
+const DDM_ALIAS_CONFIGMANAGER_APPLYDATA = window.ConfigManager.applyData
 window.ConfigManager.applyData = function (config) {
-  DDM_ALIAS_CONFIGMANAGE_APPLYDATA.call(this, config)
+  DDM_ALIAS_CONFIGMANAGER_APPLYDATA.call(this, config)
 
   if (enableAutosave) this.enableAutosaving = config.enableAutosaving
   if (enableQuicksave) this.enableQuicksaving = config.enableQuicksaving
@@ -622,7 +622,7 @@ window.Scene_Map.prototype.quickSave = async function () {
   })
 }
 
-// New function for Scene_Map to perform quickloads.
+// New function for Scene_Map to perform quick loads.
 window.Scene_Map.prototype.quickload = function () {
   if (window.DataManager.lastQuicksave === undefined) return
 
