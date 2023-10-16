@@ -377,7 +377,7 @@ window.Scene_Title.prototype.create = function () {
   DDM_ALIAS_SCENE_TITLE_CREATE.call(this)
   NodeManager.clearEvents()
   // You can setup a stress test here.
-  NodeManager.stressTest(30000, 300, true)
+  // NodeManager.stressTest(30000, 300, true)
 }
 
 const DDM_ALIAS_DATAMANAGER_SAVEGAME = window.DataManager.saveGame
