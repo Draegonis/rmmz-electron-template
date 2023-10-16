@@ -1,6 +1,6 @@
 import { DataManager, BattleManager } from '../../rmmz_managers'
 // Custom
-import { CoreManager, fileExtention } from '../../../managers/coreManager'
+import { CoreManager, fileExtension } from '../../../managers/coreManager'
 
 // EDIT: globalInfo returned from electron can be false, since it is not rejected on electron side.
 DataManager.loadGlobalInfo = function () {
@@ -25,7 +25,7 @@ DataManager.saveGame = function (savefileId) {
 
   const dataTask = {
     savefileId: saveName,
-    extention: fileExtention,
+    extension: fileExtension,
     contents,
     task: 'save'
   }
@@ -44,7 +44,7 @@ DataManager.loadGame = function (savefileId) {
 
   const dataTask = {
     savefileId: saveName,
-    extention: fileExtention,
+    extension: fileExtension,
     task: 'load',
     thenCallback: (contents) => {
       window.DataManager.createGameObjects()
@@ -75,7 +75,7 @@ DataManager.removeInvalidGlobalInfo = function () {
     const savefileId = globalInfo.indexOf(info)
     const saveFileName = this.makeSavename(savefileId)
     const saveFolder = CoreManager.saveAsFolder ? `save/${saveFileName}` : 'save'
-    CoreManager.fileExists(saveFolder, saveFileName + '.' + fileExtention)
+    CoreManager.fileExists(saveFolder, saveFileName + '.' + fileExtension)
       .then((resp) => {
         if (!resp) {
           delete globalInfo[savefileId]

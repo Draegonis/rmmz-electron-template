@@ -7,7 +7,7 @@ import { setGameVars } from '../helpers/gameFuncs'
 import { parseBoolean, parseNumber, parseSelfSW } from '../helpers/gameParsers'
 import { v4 as uuidV4 } from 'uuid'
 
-const fileExtention = 'nodeData'
+const fileExtension = 'nodeData'
 
 // ==============================================================
 // PLUGIN SETUP
@@ -50,7 +50,7 @@ const parseSwitchEvent = (switchEvent) => {
   return { ...parseBaseEvent(switchEvent), switchId, newValue, id, type }
 }
 
-const pasrseVariableEvent = (variableEvent) => {
+const parseVariableEvent = (variableEvent) => {
   const { id } = variableEvent
   const variableId = parseNumber(variableEvent.variableId)
   const type = 'var'
@@ -346,7 +346,7 @@ window.PluginManager.registerCommand(pluginName, 'switch_Event', async (args) =>
   NodeManager.scheduleEvent(nodeEvent)
 })
 window.PluginManager.registerCommand(pluginName, 'variable_Event', async (args) => {
-  const nodeEvent = pasrseVariableEvent(args)
+  const nodeEvent = parseVariableEvent(args)
   NodeManager.scheduleEvent(nodeEvent)
 })
 window.PluginManager.registerCommand(pluginName, 'selfSW_Event', async (args) => {
@@ -386,7 +386,7 @@ window.DataManager.saveGame = function (savefileId) {
 
   const dataTask = {
     savefileId,
-    extention: fileExtention,
+    extension: fileExtension,
     contents,
     task: 'save'
   }
@@ -400,7 +400,7 @@ const DDM_ALIAS_DATAMANAGER_LOADGAME = window.DataManager.loadGame
 window.DataManager.loadGame = function (savefileId) {
   const dataTask = {
     savefileId,
-    extention: fileExtention,
+    extension: fileExtension,
     task: 'load',
     thenCallback: (contents) => {
       NodeManager.onLoad(contents)

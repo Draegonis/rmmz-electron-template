@@ -1,4 +1,4 @@
-import { CoreManager, fileExtention } from '../managers/coreManager'
+import { CoreManager, fileExtension } from '../managers/coreManager'
 import { addNewInput } from '../store/inputs/useInputStore'
 import { parseBoolean, parseNumber } from '../helpers/gameParsers'
 
@@ -210,7 +210,7 @@ window.DataManager.removeInvalidGlobalInfo = async function () {
     const savefileId = info.savefileId
     const saveFolder = CoreManager.saveAsFolder ? `save/${savefileId}` : 'save'
     // Changed logic to make sure it runs in order.
-    const isSave = await CoreManager.fileExists(saveFolder, savefileId + '.' + fileExtention)
+    const isSave = await CoreManager.fileExists(saveFolder, savefileId + '.' + fileExtension)
 
     const infoIndex = this._globalInfo.findIndex((file) => file.savefileId === savefileId)
 
@@ -260,7 +260,7 @@ window.DataManager.saveGame = function (savefileId) {
 
   const dataTask = {
     savefileId,
-    extention: fileExtention,
+    extension: fileExtension,
     contents,
     task: 'save'
   }
@@ -276,7 +276,7 @@ window.DataManager.saveGame = function (savefileId) {
 window.DataManager.loadGame = function (savefileId) {
   const dataTask = {
     savefileId,
-    extention: fileExtention,
+    extension: fileExtension,
     task: 'load',
     thenCallback: (contents) => {
       window.DataManager.createGameObjects()
