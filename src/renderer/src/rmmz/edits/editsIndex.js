@@ -43,6 +43,7 @@ import { Window_TitleCommand } from './window/titleCommand'
 // Sprite edits
 import { Sprite_Enemy } from './sprite/enemy'
 import { Sprite_Battleback } from './sprite/battleback'
+import { Sprite_Actor } from './sprite/actor'
 // Re-export all edits
 export {
   // CORE EDITED
@@ -89,5 +90,6 @@ export {
   Window_TitleCommand,
   // SPRITES EDITED
   Sprite_Enemy,
-  Sprite_Battleback
+  Sprite_Battleback,
+  Sprite_Actor
 }

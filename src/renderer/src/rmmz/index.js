@@ -60,7 +60,6 @@ import {
   Scene_Status
 } from './rmmz_scenes'
 import {
-  Sprite_Actor,
   Sprite_Animation,
   Sprite_AnimationMV,
   Sprite_Balloon,
@@ -177,7 +176,8 @@ import {
   Window_GameEnd,
   // Sprites
   Sprite_Enemy,
-  Sprite_Battleback
+  Sprite_Battleback,
+  Sprite_Actor
 } from './edits/editsIndex'
 //=========================================
 // Import Custom
