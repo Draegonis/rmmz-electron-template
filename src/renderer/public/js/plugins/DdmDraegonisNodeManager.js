@@ -84,7 +84,7 @@
  * @arg newNumber
  * @text New Number Value
  * @type number
- * @desc The new number value of the game valriable.
+ * @desc The new number value of the game variable.
  *
  * @arg newNumberArray
  * @text New Number Array
