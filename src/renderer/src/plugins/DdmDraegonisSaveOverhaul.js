@@ -475,10 +475,6 @@ window.Scene_Base.prototype.executeAutosave = function () {
 // ConfigManager
 
 // Add a player option to enable or disable autosaving and quicksaving.
-
-if (enableAutosave) window.ConfigManager.enableAutosaving = true
-if (enableQuicksave) window.ConfigManager.enableQuicksaving = true
-
 const DDM_ALIAS_CONFIGMANAGER_MAKEDATA = window.ConfigManager.makeData
 window.ConfigManager.makeData = function () {
   const config = DDM_ALIAS_CONFIGMANAGER_MAKEDATA.call(this)
@@ -493,8 +489,10 @@ const DDM_ALIAS_CONFIGMANAGER_APPLYDATA = window.ConfigManager.applyData
 window.ConfigManager.applyData = function (config) {
   DDM_ALIAS_CONFIGMANAGER_APPLYDATA.call(this, config)
 
-  if (enableAutosave) this.enableAutosaving = config.enableAutosaving
-  if (enableQuicksave) this.enableQuicksaving = config.enableQuicksaving
+  if (enableAutosave)
+    this.enableAutosaving = config.enableAutosaving === undefined ? true : this.enableAutosaving
+  if (enableQuicksave)
+    this.enableQuicksaving = config.enableQuicksaving === undefined ? true : this.enableQuicksaving
 }
 
 // ================================================
