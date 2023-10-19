@@ -124,7 +124,13 @@ StorageManager.loadObject = function () {
 }
 ```
 
-8. in SceneManager remove: SceneManager.showDevTools, SceneManager.reloadGame, SceneManager.terminate.
+8. in SceneManager remove: SceneManager.showDevTools, SceneManager.reloadGame, and change SceneManager.terminate to the code below.
+
+```
+
+SceneManager.terminate = function () {}
+
+```
 
 - Edit SceneManager.onKeyDown to:
 
