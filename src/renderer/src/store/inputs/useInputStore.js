@@ -20,35 +20,43 @@ const defaultCommandIndex = {
   },
   cancel: {
     keyCode: 88,
-    button: 1
+    button: 1,
+    mouse: 2
   },
   escape: {
     keyCode: 27,
-    button: undefined
+    button: undefined,
+    mouse: undefined
   },
   tab: {
     keyCode: 9,
-    button: undefined
+    button: undefined,
+    mouse: undefined
   },
   shift: {
     keyCode: 16,
-    button: 0
+    button: 0,
+    mouse: undefined
   },
   control: {
     keyCode: 17,
-    button: undefined
+    button: undefined,
+    mouse: undefined
   },
   menu: {
     keyCode: undefined,
-    button: 3
+    button: 3,
+    mouse: 1
   },
   pageup: {
     keyCode: 33,
-    button: 4
+    button: 4,
+    mouse: undefined
   },
   pagedown: {
     keyCode: 34,
-    button: 5
+    button: 5,
+    mouse: undefined
   },
   up: { keyCode: 38 },
   down: { keyCode: 40 },
@@ -179,12 +187,17 @@ const useInputStore = create(
           ) {
             if (window.SoundManager) window.SoundManager.playBuzzer()
           } else {
-            inputIndex[type][`${newInput}`] = command
-            commandIndex[command][type] = newInput
+            if (type === 'mouse' && newInput === 0) {
+              // Don't want to overwrite the left mouse button.
+              if (window.SoundManager) window.SoundManager.playBuzzer()
+            } else {
+              inputIndex[type][`${newInput}`] = command
+              commandIndex[command][type] = newInput
 
-            if (oldInput && switchCommand && switchCommand !== command) {
-              inputIndex[type][`${oldInput}`] = switchCommand
-              commandIndex[switchCommand][type] = oldInput
+              if (oldInput && switchCommand && switchCommand !== command) {
+                inputIndex[type][`${oldInput}`] = switchCommand
+                commandIndex[switchCommand][type] = oldInput
+              }
             }
           }
         })

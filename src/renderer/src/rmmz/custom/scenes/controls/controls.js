@@ -9,6 +9,7 @@ import { Window_Text } from '../../windows/utility/text'
 import { Window_Controls } from './windows/controls'
 import { Scene_EditKeys } from './editKeys'
 import { Scene_EditGamepad } from './editGamepad'
+import { Scene_EditMouse } from './editMouse'
 
 function Scene_Controls() {
   this.initialize(...arguments)
@@ -32,7 +33,7 @@ Scene_Controls.prototype.terminate = function () {
 
 Scene_Controls.prototype.controlsWindowRect = function () {
   const ww = 450
-  const wh = this.calcWindowHeight(4, true)
+  const wh = this.calcWindowHeight(5, true)
   const wx = (Graphics.boxWidth - ww) / 2
   const wy = (Graphics.boxHeight - wh) / 2
   return new Rectangle(wx, wy, ww, wh)
@@ -42,6 +43,7 @@ Scene_Controls.prototype.createControlsWindow = function () {
   const rect = this.controlsWindowRect()
   this._controlsWindow = new Window_Controls(rect)
   this._controlsWindow.setHandler('editKeys', this.editKeys.bind(this))
+  this._controlsWindow.setHandler('editMouse', this.editMouse.bind(this))
   this._controlsWindow.setHandler('editGamepad', this.editGamepad.bind(this))
   this._controlsWindow.setHandler('resetInput', this.resetInput.bind(this))
   this._controlsWindow.setHandler('cancel', this.popScene.bind(this))
@@ -50,6 +52,10 @@ Scene_Controls.prototype.createControlsWindow = function () {
 
 Scene_Controls.prototype.editKeys = function () {
   SceneManager.push(Scene_EditKeys)
+}
+
+Scene_Controls.prototype.editMouse = function () {
+  SceneManager.push(Scene_EditMouse)
 }
 
 Scene_Controls.prototype.editGamepad = function () {

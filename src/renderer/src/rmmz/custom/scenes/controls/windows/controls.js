@@ -14,6 +14,8 @@ Window_Controls.prototype.initialize = function (rect) {
 Window_Controls.prototype.makeCommandList = function () {
   // keyboard -> go to edit key bindings
   this.addCommand('Change key bindings', 'editKeys')
+  // mouse -> go to edit mouse input
+  this.addCommand('Change mouse bindings', 'editMouse')
   // gamepad -> go to edit gamepad input
   this.addCommand('Change gamepad bindings', 'editGamepad')
   // reset -> select keyboard or gamepad or cancel

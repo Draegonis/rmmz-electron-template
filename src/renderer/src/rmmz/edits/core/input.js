@@ -294,7 +294,22 @@ Input.displayInput = {
     'button-19',
     'button-20'
   ],
-  axis: ['axis-1', 'axis-2', 'axis-3', 'axis-4', 'axis-5', 'axis-6', 'axis-7', 'axis-8', 'axis-9']
+  axis: ['axis-1', 'axis-2', 'axis-3', 'axis-4', 'axis-5', 'axis-6', 'axis-7', 'axis-8', 'axis-9'],
+  mouse: [
+    'left mouse button',
+    'middle mouse button',
+    'right mouse button',
+    'extra button 1',
+    'extra button 2',
+    'extra button 3',
+    'extra button 4',
+    'extra button 5',
+    'extra button 6',
+    'extra button 7',
+    'extra button 8',
+    'extra button 9',
+    'extra button 10'
+  ]
 }
 
 // EDIT: removed this._gamepadStates, and added some variables to hold temp data.
