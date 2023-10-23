@@ -1,6 +1,7 @@
 import { CoreManager, fileExtension } from '../managers/coreManager'
 import { addNewInput } from '../store/inputs/useInputStore'
 import { parseBoolean, parseNumber } from '../helpers/gameParsers'
+import { isEmpty as r_isEmpty } from 'ramda'
 
 // ================================================
 // Setup/Params
@@ -474,6 +475,9 @@ window.Scene_Base.prototype.executeAutosave = function () {
 // ================================================
 // ConfigManager
 
+window.ConfigManager.enableAutosaving = true
+window.ConfigManager.enableQuicksaving = true
+
 // Add a player option to enable or disable autosaving and quicksaving.
 const DDM_ALIAS_CONFIGMANAGER_MAKEDATA = window.ConfigManager.makeData
 window.ConfigManager.makeData = function () {
@@ -489,10 +493,10 @@ const DDM_ALIAS_CONFIGMANAGER_APPLYDATA = window.ConfigManager.applyData
 window.ConfigManager.applyData = function (config) {
   DDM_ALIAS_CONFIGMANAGER_APPLYDATA.call(this, config)
 
-  if (enableAutosave)
-    this.enableAutosaving = config.enableAutosaving === undefined ? true : this.enableAutosaving
-  if (enableQuicksave)
-    this.enableQuicksaving = config.enableQuicksaving === undefined ? true : this.enableQuicksaving
+  if (!r_isEmpty(config)) {
+    if (enableAutosave) this.enableAutosaving = config.enableAutosaving
+    if (enableQuicksave) this.enableQuicksaving = config.enableQuicksaving
+  }
 }
 
 // ================================================
