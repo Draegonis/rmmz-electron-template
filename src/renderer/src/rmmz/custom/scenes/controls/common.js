@@ -31,11 +31,11 @@ const setWaitingForInput = function () {
 //=========================================
 // Scene_EditKeys/Scene_EditGamepad
 
-const createInfoWindow = function () {
+const createInfoWindow = function (text) {
   const ww = 400
   const wx = (Graphics.boxWidth - ww) / 2
   const wy = Graphics.boxHeight / 2 - 50
-  this._infoWindow = new Window_Text(new Rectangle(wx, wy, ww, 56), 'Press any key.', 'center')
+  this._infoWindow = new Window_Text(new Rectangle(wx, wy, ww, 56), text, 'center')
   this.addWindow(this._infoWindow)
   this._infoWindow.hide()
 }

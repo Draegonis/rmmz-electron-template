@@ -10,7 +10,6 @@ import {
   Stage,
   Tilemap,
   TilingSprite,
-  TouchInput,
   Video,
   Weather,
   Window,
@@ -138,6 +137,7 @@ import {
   WebAudio,
   Bitmap,
   Input,
+  TouchInput,
   // Managers
   DataManager,
   ConfigManager,

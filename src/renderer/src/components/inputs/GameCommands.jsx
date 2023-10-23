@@ -1,6 +1,7 @@
 import { useInputStore } from '../../store/inputs/useInputStore'
 import '../../store/inputs/Gamepad'
 import '../../store/inputs/Keyboard'
+import '../../store/inputs/Mouse'
 
 const GameCommands = () => {
   if (window.Input) {

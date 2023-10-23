@@ -21,7 +21,7 @@ Scene_EditKeys.prototype.constructor = Scene_EditKeys
 Scene_EditKeys.prototype.initialize = function () {
   Scene_MenuBase.prototype.initialize.call(this)
   this._tempCommands = window.Input._commands
-  this.createInfoWindow = createInfoWindow.bind(this)
+  this.createInfoWindow = createInfoWindow.bind(this, 'Press any key.')
   this.editWindowRect = editWindowRect.bind(this)
   this.terminate = terminateEdit.bind(this)
   this.updateEditWindow = updateEditWindow.bind(this)

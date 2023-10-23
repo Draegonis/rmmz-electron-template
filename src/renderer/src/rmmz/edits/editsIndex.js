@@ -4,6 +4,7 @@ import { Graphics } from './core/graphics'
 import { Bitmap } from './core/bitmap'
 import { WebAudio } from './core/webaudio'
 import { Input } from './core/input'
+import { TouchInput } from './core/touchInput'
 // Managers edits.
 import { ConfigManager } from './managers/configManager'
 import { DataManager } from './managers/dataManager'
@@ -52,6 +53,7 @@ export {
   Graphics,
   Input,
   WebAudio,
+  TouchInput,
   // MANAGERS EDITED
   ConfigManager,
   DataManager,
