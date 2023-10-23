@@ -11,8 +11,13 @@ ConfigManager.window = await window.electron.ipcRenderer.invoke('load-window')
 // the game. Saves data in user data folder as config.json.
 ConfigManager.load = function () {
   window.electron.ipcRenderer.invoke('load-config').then((res) => {
-    this.applyData(res || {})
-    this._isLoaded = true
+    if (res.alwaysDash === undefined) {
+      this.save()
+      this._isLoaded = true
+    } else {
+      this.applyData(res || {})
+      this._isLoaded = true
+    }
   })
 }
 ConfigManager.save = function () {

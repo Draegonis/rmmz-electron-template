@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
-import { RingLoader } from 'react-spinners'
+import { Animation } from '../../utility/Animation'
 import { styled } from 'styled-components'
 
 const StyledDiv = styled.div`
+  ${(props) => `
+  transform: scale(${props.$zoom});
+  right: ${props.$zoom * 25}px;
+  bottom: ${props.$zoom * 25}px;
+  `}
   position: absolute;
   z-index: 20;
-  right: 25px;
-  bottom: 25px;
 `
 
 const SaveIndicator = () => {
@@ -39,9 +42,20 @@ const SaveIndicator = () => {
   }, [saveIndicator])
 
   return (
-    <StyledDiv>
-      <RingLoader loading={showIndicator} size={75 * scale} color="#002aff" />
-    </StyledDiv>
+    <>
+      {showIndicator && (
+        <StyledDiv $zoom={scale}>
+          <Animation
+            filename={'savingSheet.png'}
+            duration={1}
+            totalWidth={970}
+            frames={10}
+            width={97}
+            height={52}
+          />
+        </StyledDiv>
+      )}
+    </>
   )
 }
 
