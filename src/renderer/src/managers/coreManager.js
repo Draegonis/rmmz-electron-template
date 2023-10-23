@@ -10,9 +10,6 @@ class Ddm_CoreManager {
       case 'save':
         window.INDICATORS.startSaveIndicator()
         break
-      case 'load':
-        window.INDICATORS.startLoadIndicator()
-        break
     }
   }
 
@@ -21,9 +18,6 @@ class Ddm_CoreManager {
     switch (mode) {
       case 'save':
         window.INDICATORS.endSaveIndicator()
-        break
-      case 'load':
-        window.INDICATORS.endLoadIndicator()
         break
     }
   }
