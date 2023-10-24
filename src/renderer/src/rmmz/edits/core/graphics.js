@@ -47,7 +47,7 @@ Graphics._makeErrorHtml = function (name, message, error) {
     error?.stack.split(/\r?\n/).forEach((text, index) => {
       if (index > 0) {
         const atFunc = text.match(/at\s[A-Za-z_.]+\s/)
-        const atScript = text.match(/[A-Za-z_]+\.js:[0-9]+:[0-9]+/)
+        const atScript = text.match(/[[A-Za-z_]+\.(js|jsx):[0-9]+:[0-9]+/)
 
         if (atFunc) {
           if (atScript) {
