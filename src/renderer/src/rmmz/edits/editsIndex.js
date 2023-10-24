@@ -36,11 +36,13 @@ import { Scene_Options } from './scenes/options'
 import { Scene_Title } from './scenes/title'
 import { Scene_Save } from './scenes/save'
 import { Scene_Load } from './scenes/load'
+import { Scene_Map } from './scenes/map'
 // Window edits
 import { Window_GameEnd } from './window/gameEnd'
 import { Window_MenuCommand } from './window/menuCommand'
 import { Window_Options } from './window/options'
 import { Window_TitleCommand } from './window/titleCommand'
+import { Window_Selectable } from './window/selectable'
 // Sprite edits
 import { Sprite_Enemy } from './sprite/enemy'
 import { Sprite_Battleback } from './sprite/battleback'
@@ -85,11 +87,13 @@ export {
   Scene_Title,
   Scene_Save,
   Scene_Load,
+  Scene_Map,
   // WINDOWS EDITED
   Window_GameEnd,
   Window_MenuCommand,
   Window_Options,
   Window_TitleCommand,
+  Window_Selectable,
   // SPRITES EDITED
   Sprite_Enemy,
   Sprite_Battleback,
