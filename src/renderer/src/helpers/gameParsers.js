@@ -18,7 +18,12 @@ export const parseSelfSW = (id) => {
  * @param {number} min the failsafe number if it fails to convert the value.
  * @returns {number}
  */
-export const parseNumber = (value, min) => Number(value || min ? min : -1)
+export const parseNumber = (value, min) => {
+  let num = undefined
+  num = Number(value)
+  if (!num) num = min ? min : -1
+  return num
+}
 
 /**
  * A simple parser to convert a string value into a usable boolean.
