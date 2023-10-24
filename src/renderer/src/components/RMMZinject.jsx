@@ -7,7 +7,7 @@ const isScriptLoaded = document.getElementById('RmmzMain')
 window.PIXI = PIXI
 
 if (!isScriptLoaded) {
-  const { ...RMMZ } = await import(`./rmmz/index.js`)
+  const { ...RMMZ } = await import(`../rmmz/index.js`)
   Object.entries(RMMZ).forEach(([key, value]) => {
     window[key] = value
   })
@@ -15,13 +15,17 @@ if (!isScriptLoaded) {
 
 // Function to load plugin modules. See README.md on how to setup a plugin.
 window.loadPluginJs = async function (pluginName) {
-  await import(`./plugins/${pluginName}.js`)
+  await import(`../plugins/${pluginName}.js`)
 }
 
 //Add the two libs and plugin.js to the index.html. These cannot be imported as modules.
 //Setup the plugins, then when finished add main.js and it will run onWindowLoad, since
 //the window is already loaded and won't fire normally.
-const scriptUrls = ['./js/libs/effekseer.min.js', './js/libs/vorbisdecoder.js', './js/plugins.js']
+const scriptUrls = [
+  '../js/libs/effekseer.min.js',
+  '../js/libs/vorbisdecoder.js',
+  '../js/plugins.js'
+]
 let scriptCount = 0
 
 const loadScript = () => {
@@ -35,7 +39,7 @@ const loadScript = () => {
       if (++scriptCount === 3) {
         window.PluginManager.setup(window.$plugins)
         const main = document.createElement('script')
-        main.src = './js/edited_main.js'
+        main.src = '../js/edited_main.js'
         main.type = 'text/javascript'
         main.defer = true
         main.id = 'RmmzMain'
