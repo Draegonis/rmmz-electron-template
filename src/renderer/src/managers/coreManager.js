@@ -5,19 +5,19 @@ class Ddm_CoreManager {
   saveAsFolder = true
 
   #startTask(mode) {
-    if (!window.INDICATORS) return
+    if (!window.$APP) return
     switch (mode) {
       case 'save':
-        window.INDICATORS.startSaveIndicator()
+        window.$APP.indicators.onSaveStart()
         break
     }
   }
 
   #endTask(mode) {
-    if (!window.INDICATORS) return
+    if (!window.$APP) return
     switch (mode) {
       case 'save':
-        window.INDICATORS.endSaveIndicator()
+        window.$APP.indicators.onSaveEnd()
         break
     }
   }

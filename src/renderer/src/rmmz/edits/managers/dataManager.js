@@ -98,8 +98,9 @@ DataManager.loadDatabase = function () {
 }
 
 DataManager.isBattleTest = function () {
+  const { ENV } = window.$APP._test
   // EDIT: Changed to a variable loaded from .env.development
-  return window.$TEST.ENV === 'battle'
+  return ENV === 'battle'
 }
 
 DataManager.isEventTest = function () {
@@ -108,15 +109,18 @@ DataManager.isEventTest = function () {
 }
 
 DataManager.isTitleSkip = function () {
+  const { ENV } = window.$APP._test
   // EDIT: Changed to a variable loaded from .env.development
-  return window.$TEST.ENV === 'skiptitle'
+  return ENV === 'skiptitle'
 }
 
 DataManager.setupBattleTest = function () {
+  const { TROOPID } = window.$APP._test
+
   this.createGameObjects()
   window.$gameParty.setupBattleTest()
   // EDIT: Changed to load a troop id set in .env.development
-  BattleManager.setup(window.$TEST.TROOPID, true, false)
+  BattleManager.setup(TROOPID, true, false)
   BattleManager.setBattleTest(true)
   BattleManager.playBattleBgm()
 }

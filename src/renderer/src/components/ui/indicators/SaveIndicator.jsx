@@ -18,10 +18,10 @@ const SaveIndicator = () => {
   const [saveIndicator, setSaveIndicator] = useState(false)
   const [showIndicator, setShowIndicator] = useState(false)
 
-  window.INDICATORS.startSaveIndicator = () => {
+  window.$APP.indicators.onSaveStart = () => {
     setSaveIndicator(true)
   }
-  window.INDICATORS.endSaveIndicator = () => {
+  window.$APP.indicators.onSaveEnd = () => {
     setSaveIndicator(false)
   }
 
