@@ -1,6 +1,7 @@
 import { TouchInput } from '../../rmmz_core'
 
 // EDIT: Removed these to let the Mouse.js handle it.
+delete TouchInput.isCancelled
 delete TouchInput._onMiddleButtonDown
 delete TouchInput._onRightButtonDown
 

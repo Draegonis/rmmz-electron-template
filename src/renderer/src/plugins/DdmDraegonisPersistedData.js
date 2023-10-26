@@ -45,7 +45,7 @@ const initPersist = {
 /**
  * A function that updates specific parts of state.stored in the database.
  * @param {string} key - the key in state.stored to update.
- * @param {Draft["stored"]} stored - the WritableDraft of state.stored.
+ * @param {Draft} state - the WritableDraft of state.
  */
 const storeSingleType = (key, state) => {
   const stored = state.stored
@@ -124,7 +124,7 @@ const persistStore = create(
       immer((set, get) => ({
         ...initPersist,
         /**
-         * A function to initialize the store variables with the data in DdmPersist.json.
+         * A function to initialize the store variables.
          */
         initStore() {
           const isInit = get().isInit
@@ -194,6 +194,11 @@ const persistStore = create(
 
           return newId
         },
+        /**
+         * Updates a single entry in the store.
+         * @param {string} type the type of persisted data to update the single value of.
+         * @param {number | [number, number, string]} id the number or key id to update.
+         */
         saveSingleValue(type, id) {
           set((state) => {
             const stored = state.stored[type]
@@ -219,6 +224,10 @@ const persistStore = create(
          * stored object maps.
          */
         storage: {
+          /**
+           * The getter called by the store to get the values from the file.
+           * @returns {state}
+           */
           getItem: async () => {
             const storeState = await CoreManager.loadFromFile(...persistPath, true)
 
@@ -228,10 +237,13 @@ const persistStore = create(
               }
             }
           },
+          /**
+           * The setter called by the store to save the data to the file.
+           */
           setItem: async (_, newValue) => {
             const storeData = newValue.state
 
-            // this is to remove all functions
+            // this is to remove all functions.
             const str = JSON.stringify(storeData)
             const toSave = JSON.parse(str)
 
@@ -255,7 +267,7 @@ const persistStore = create(
 //                      MANAGER
 
 /**
- * The static manager class to expose the functions onto the api.
+ * The manager class to expose store functions.
  */
 class PersistManager {
   #initStore = persistStore.getState().initStore
@@ -326,6 +338,7 @@ window.DataManager.setupNewGame = function () {
   PersistDataManager.onLoad('')
 }
 
+// Since the uuid is very small amount of data best to add it within the normal save data.
 const DDM_ALIAS_DATAMANAGER_MAKESAVECONTENTS = window.DataManager.makeSaveContents
 window.DataManager.makeSaveContents = function () {
   const contents = DDM_ALIAS_DATAMANAGER_MAKESAVECONTENTS.call(this)

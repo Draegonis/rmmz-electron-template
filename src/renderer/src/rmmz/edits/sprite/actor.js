@@ -31,7 +31,6 @@ const adjustPosition = (index) => {
 // You may need to change the values based on your game.
 Sprite_Actor.prototype.setActorHome = function (index) {
   const [adjustedX, adjustedY, offsetX, offsetY] = adjustPosition(index)
-  console.log(adjustedX, adjustedY, offsetX, offsetY)
   this.setHome(adjustedX + offsetX, adjustedY + offsetY)
 }
 

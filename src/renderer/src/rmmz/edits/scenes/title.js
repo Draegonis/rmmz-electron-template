@@ -19,8 +19,8 @@ Scene_Title.prototype.drawGameTitle = function () {
   const x = 20
   const y = Graphics.height / 4
   const maxWidth = Graphics.width - x * 2
-  // EDIT: changed to window.$APP_NAME to create a single source of truth for the game name.
-  const text = window.$APP_NAME
+  // EDIT: changed to window.$APP._name to create a single source of truth for the game name.
+  const text = window.$APP._name
   const bitmap = this._gameTitleSprite.bitmap
   bitmap.fontFace = window.$gameSystem.mainFontFace()
   bitmap.outlineColor = 'black'

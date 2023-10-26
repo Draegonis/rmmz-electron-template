@@ -16,8 +16,10 @@ Game_Party.prototype.loadContents = function (contents) {
 }
 
 Game_Party.prototype.setupBattleTestMembers = function () {
+  const { BATTLERS } = window.$APP._test
+
   // EDIT: Changed to a variable loaded from .env.development
-  for (const battler of window.$TEST.BATTLERS) {
+  for (const battler of BATTLERS) {
     const actor = window.$gameActors.actor(battler.actorId)
     if (actor) {
       actor.changeLevel(battler.level, false)
