@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Animation } from '../../utility/Animation'
+import { AnimateSheet } from '../../utility/AnimateSheet'
 import { styled } from 'styled-components'
 
 const StyledDiv = styled.div`
@@ -45,7 +45,7 @@ const SaveIndicator = () => {
     <>
       {showIndicator && (
         <StyledDiv $zoom={scale}>
-          <Animation
+          <AnimateSheet
             filename={'savingSheet.png'}
             duration={1}
             totalWidth={970}
