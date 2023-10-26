@@ -23,14 +23,29 @@ const secondsPerTick = parseNumber(params.secondsPerTick)
 // ==============================================================
 // HELPERS
 
+/**
+ * Checks the type to see if it is a node switch.
+ * @param {object} data the node data to be checked.
+ * @returns {boolean}
+ */
 const isNodeSwitch = (data) => {
   return data.type === 'switch'
 }
 
+/**
+ * Checks the type to see if it is a node variable.
+ * @param {object} data the node data to be checked.
+ * @returns {boolean}
+ */
 const isNodeVariable = (data) => {
   return data.type === 'var'
 }
 
+/**
+ * Checks the type to see if it is a node self switch.
+ * @param {object} data the node data to be checked.
+ * @returns {boolean}
+ */
 const isNodeSelfSW = (data) => {
   return data.type === 'selfSW'
 }
@@ -38,10 +53,21 @@ const isNodeSelfSW = (data) => {
 // ===================================================
 // Unique Parsers
 
+/**
+ * The base parser for node events, all events will have these properties.
+ * @param {object} nodeEvent the node event to be parsed.
+ * @returns {{tick: number, isTrackable: boolean}}
+ */
 const parseBaseEvent = (nodeEvent) => {
   return { tick: parseNumber(nodeEvent.tick), isTrackable: parseBoolean(nodeEvent.isTrackable) }
 }
 
+/**
+ * A parser to handle node switch event data from Rpg Maker.
+ * @param {{id: string, switchId: string, newValue: string, type: string, tick: string, isTrackable: string}} switchEvent
+ * the switch event data that needs to be converted into usable values.
+ * @returns {{ tick: number, isTrackable: boolean, switchId: number, newValue: boolean, id: string, type: string }}
+ */
 const parseSwitchEvent = (switchEvent) => {
   const { id } = switchEvent
   const switchId = parseNumber(switchEvent.switchId)
@@ -50,6 +76,12 @@ const parseSwitchEvent = (switchEvent) => {
   return { ...parseBaseEvent(switchEvent), switchId, newValue, id, type }
 }
 
+/**
+ * A parser to handle node variable event data from Rpg Maker.
+ * @param {{id: string, variableId: string, newNumber: string | undefined, newNumberArray: string | undefined, newString: string | undefined, newStringArray: string | undefined, type: string, tick: string, isTrackable: string}} variableEvent
+ * the variable event data that needs to be converted into usable values.
+ * @returns {{ tick: number, isTrackable: boolean, variableId: number, newValue: number | number[] | string | string[], id: string, type: string }}
+ */
 const parseVariableEvent = (variableEvent) => {
   const { id } = variableEvent
   const variableId = parseNumber(variableEvent.variableId)
@@ -68,6 +100,12 @@ const parseVariableEvent = (variableEvent) => {
   return { ...parseBaseEvent(variableEvent), variableId, newValue, id, type }
 }
 
+/**
+ * A parser to handle node self switch event data from Rpg Maker.
+ * @param {{id: string, key: string, newValue: string, type: string, tick: string, isTrackable: string}} selfSW_Event
+ * the self switch event data that needs to be converted into usable values.
+ * @returns {{ tick: number, isTrackable: boolean, key: [number, number, string], newValue: boolean, id: string, type: string }}
+ */
 const parseSelfSW_Event = (selfSW_Event) => {
   const { id } = selfSW_Event
   const key = parseSelfSW(selfSW_Event.key)
@@ -81,36 +119,62 @@ const parseSelfSW_Event = (selfSW_Event) => {
 //                MANAGER
 
 class DdmNodeManager {
-  #savePath = () => {
-    return ['save', `${window.DataManager.currentSave}.nodeData`]
-  }
-
+  /**
+   * the variable that is undefined or a Worker.
+   */
   #worker
+  /**
+   * this is true when the data is being worked on in the worker.
+   */
   #workInProgress = false
 
+  /**
+   * the holder for the interval so it can be stopped/cleared.
+   */
   #interval = undefined
+  /**
+   * the counter for the seconds, up to the secondsPerTick.
+   */
   #seconds = 0
+  /**
+   * how many seconds there are per node tick.
+   */
   #secondsPerTick
 
+  /**
+   * the variable that determines whether to have the interval active.
+   */
   #autoTick = true
   get _isPaused() {
     return !this.#autoTick
   }
 
+  /**
+   * the current game tick.
+   */
   #tick = 0
   get _tick() {
     return this.#tick
   }
 
+  /**
+   * the container that holds all node information.
+   */
   #tickEvents = []
   get _tickEvents() {
     return this.#tickEvents
   }
+  /**
+   * the object that holds a reference to all node events with isTrackable === true.
+   */
   #trackedEvents = {}
   get _trackedEvents() {
     return this.#trackedEvents
   }
 
+  /**
+   * a backup in case a node event is added while the worker is busy.
+   */
   #eventCache = []
 
   constructor(secondsPerTick) {
@@ -122,36 +186,20 @@ class DdmNodeManager {
    * The method to start the game tick.
    */
   start() {
-    if (!this.#worker) this.#initWorker()
-    if (!this.#autoTick) this.#autoTick = true
-    if (!this.#interval) {
-      this.#interval = window.setInterval(() => {
-        if (!this.#autoTick) return
-        this.#seconds++
-        if (this.#seconds === this.#secondsPerTick) {
-          this.#seconds = 0
-          this.#tick++
-          this.#incrementTick()
-        }
-      }, 1000)
-    }
+    this.#initWorker()
+    this.#createInterval()
   }
   /**
    * The method to stop game tick.
    */
   stop() {
-    if (this.#worker) this.#terminateWorker()
-
-    if (this.#interval) {
-      clearInterval(this.#interval)
-      this.#interval = undefined
-    }
+    this.#terminateWorker()
+    this.#clearInterval()
   }
   /**
    * A method to resume the automatic start/stop of the tick when switching scenes.
    */
   resumeTick() {
-    if (!this.#worker) this.start()
     this.#autoTick = true
   }
   /**
@@ -168,6 +216,8 @@ class DdmNodeManager {
       nodeEvents: this.#tickEvents,
       nodeTracked: this.#trackedEvents
     }
+    // Add a fake event at the end of nodeEvents with the current tick so it
+    // can be retrieved from the save file.
     saveData.nodeEvents.push({
       id: 'storeTick',
       type: 'custom',
@@ -221,14 +271,18 @@ class DdmNodeManager {
    * A method to create a new worker instance.
    */
   #initWorker() {
-    this.#worker = new DdmNodeWorker()
+    if (!this.#worker) {
+      this.#worker = new DdmNodeWorker()
 
-    this.#worker.onmessage = async ({ data }) => {
-      const { eventsToFire, newEvents, newTracked } = data
+      this.#worker.onmessage = async ({ data }) => {
+        const { eventsToFire, newEvents, newTracked } = data
 
-      this.#workInProgress = false
-      this.#setEventData(newEvents, newTracked)
-      if (!isEmpty(eventsToFire)) this.#onWorkFinished(eventsToFire)
+        this.#tickEvents.length = 0
+        this.#workInProgress = false
+
+        this.#setEventData(newEvents, newTracked)
+        if (!isEmpty(eventsToFire)) this.#onWorkFinished(eventsToFire)
+      }
     }
   }
   /**
@@ -242,7 +296,33 @@ class DdmNodeManager {
   /**
    *
    */
-  async #incrementTick() {
+  #createInterval() {
+    if (!this.#interval) {
+      this.#interval = window.setInterval(() => {
+        if (!NodeManager._isPaused) {
+          if (this.#seconds === this.#secondsPerTick) {
+            this.#seconds = 0
+            this.#tick++
+            this.#onTick()
+          }
+        }
+        this.#seconds++
+      }, 1000)
+    }
+  }
+  /**
+   *
+   */
+  #clearInterval() {
+    if (this.#interval) {
+      clearInterval(this.#interval)
+      this.#interval = undefined
+    }
+  }
+  /**
+   * a method for when the tick has been increased and needs to pass all the events to the worker.
+   */
+  async #onTick() {
     if (!isEmpty(this.#tickEvents)) {
       this.#workInProgress = true
 
@@ -255,15 +335,14 @@ class DdmNodeManager {
     }
   }
   /**
-   *
+   * a method that takes the new data and assigns them into the proper variables.
    */
   #setEventData(newEvents, newTracked) {
     if (!isEmpty(newTracked)) {
       Object.assign(this.#trackedEvents, newTracked)
     }
 
-    this.#tickEvents.length = 0
-    this.#tickEvents = newEvents
+    this.#tickEvents.push(...newEvents)
   }
   /**
    * A method that schedules the cached events when the worker is finished.
@@ -284,7 +363,7 @@ class DdmNodeManager {
     this.#eventCache.length = 0
   }
   /**
-   *
+   * a method that runs the proper function on the events that are at tick 0.
    */
   async #executeEvent(toExecute) {
     if (isNodeSelfSW(toExecute)) {
@@ -424,11 +503,11 @@ window.SceneManager.changeScene = function () {
     }
     // Manage tick state for when it is on the map.
     // Can easily be changed to include other scenes.
-    if (NodeManager._isPaused && this._nextScene instanceof window.Scene_Map) {
-      NodeManager.resumeTick()
+    if (this._nextScene instanceof window.Scene_Map) {
+      if (!NodeManager._isPaused) NodeManager.resumeTick()
     }
-    if (!NodeManager._isPaused && !(this._nextScene instanceof window.Scene_Map)) {
-      NodeManager.pauseTick()
+    if (!(this._nextScene instanceof window.Scene_Map)) {
+      if (!NodeManager._isPaused) NodeManager.pauseTick()
     }
     this._scene = this._nextScene
     this._nextScene = null
