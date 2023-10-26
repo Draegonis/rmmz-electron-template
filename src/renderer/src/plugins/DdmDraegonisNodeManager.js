@@ -142,11 +142,43 @@ class DdmNodeManager {
   #secondsPerTick
 
   /**
-   * the variable that determines whether to have the interval active.
+   * the variable that determines whether to have the interval active automatically.
    */
   #autoTick = true
+  get _isAutoTicking() {
+    return this.#autoTick
+  }
+  /**
+   * A method to resume the automatic start/stop of the tick when switching scenes.
+   */
+  resumeAutoTick() {
+    this.#autoTick = true
+  }
+  /**
+   * A method to pause the automatic start/stop of the tick when switching scenes.
+   */
+  pauseAutoTick() {
+    this.#autoTick = false
+  }
+
+  /**
+   * The variable that controls the node ticks manually.
+   */
+  #manualPause = false
   get _isPaused() {
-    return !this.#autoTick
+    return this.#manualPause
+  }
+  /**
+   * A method to be used by plugin command to resume the node ticks.
+   */
+  requestTickPause() {
+    this.#manualPause = true
+  }
+  /**
+   * A method to be used by plugin command to pause the node ticks.
+   */
+  requestTickResume() {
+    this.#manualPause = false
   }
 
   /**
@@ -195,18 +227,6 @@ class DdmNodeManager {
   stop() {
     this.#terminateWorker()
     this.#clearInterval()
-  }
-  /**
-   * A method to resume the automatic start/stop of the tick when switching scenes.
-   */
-  resumeTick() {
-    this.#autoTick = true
-  }
-  /**
-   * A method to pause the automatic start/stop of the tick when switching scenes.
-   */
-  pauseTick() {
-    this.#autoTick = false
   }
   /**
    * The method called to setup the save data for the save file.
@@ -299,7 +319,8 @@ class DdmNodeManager {
   #createInterval() {
     if (!this.#interval) {
       this.#interval = window.setInterval(() => {
-        if (!NodeManager._isPaused) {
+        if (NodeManager._isAutoTicking && !NodeManager._isPaused) {
+          console.log('Tick is running.')
           if (this.#seconds === this.#secondsPerTick) {
             this.#seconds = 0
             this.#tick++
@@ -411,10 +432,10 @@ const NodeManager = new DdmNodeManager(secondsPerTick)
 
 // Pause/resume based on window state.
 window.addEventListener('focus', () => {
-  NodeManager.resumeTick()
+  NodeManager.resumeAutoTick()
 })
 window.addEventListener('blur', () => {
-  NodeManager.pauseTick()
+  NodeManager.pauseAutoTick()
 })
 
 // ============================================================================
@@ -439,10 +460,10 @@ window.PluginManager.registerCommand(pluginName, 'stop', () => {
   NodeManager.stop()
 })
 window.PluginManager.registerCommand(pluginName, 'resumeTick', () => {
-  NodeManager.resumeTick()
+  NodeManager.requestTickResume()
 })
 window.PluginManager.registerCommand(pluginName, 'pauseTick', () => {
-  NodeManager.pauseTick()
+  NodeManager.requestTickPause()
 })
 window.PluginManager.registerCommand(pluginName, 'clearEvents', () => {
   NodeManager.clearEvents()
@@ -456,7 +477,7 @@ window.Scene_Title.prototype.create = function () {
   DDM_ALIAS_SCENE_TITLE_CREATE.call(this)
   NodeManager.clearEvents()
   // You can setup a stress test here.
-  // NodeManager.stressTest(30000, 300, true)
+  NodeManager.stressTest(30000, 300, true)
 }
 
 const DDM_ALIAS_DATAMANAGER_SAVEGAME = window.DataManager.saveGame
@@ -501,14 +522,16 @@ window.SceneManager.changeScene = function () {
       this._scene.terminate()
       this.onSceneTerminate()
     }
-    // Manage tick state for when it is on the map.
+
+    // Manage auto tick state for when it is on the map.
     // Can easily be changed to include other scenes.
     if (this._nextScene instanceof window.Scene_Map) {
-      if (!NodeManager._isPaused) NodeManager.resumeTick()
+      NodeManager.resumeAutoTick()
     }
     if (!(this._nextScene instanceof window.Scene_Map)) {
-      if (!NodeManager._isPaused) NodeManager.pauseTick()
+      NodeManager.pauseAutoTick()
     }
+
     this._scene = this._nextScene
     this._nextScene = null
     if (this._scene) {
