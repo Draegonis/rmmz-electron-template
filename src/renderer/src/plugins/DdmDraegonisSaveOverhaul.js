@@ -40,15 +40,27 @@ window.DataManager.isQuickloading = false
 window.DataManager.lastAutosave = undefined
 window.DataManager.lastQuicksave = undefined
 
+/**
+ * Function to set the last save number for autosaves or quicksaves.
+ * @param {'Autosave' | 'Quicksave'} saveType the string used to switch between the save types.
+ * @param {number} saveNumber the save id number of the last save to be set to.
+ */
 window.DataManager.setLastSave = function (saveType, saveNumber) {
   switch (saveType) {
     case 'Autosave':
-      return (this.lastAutosave = saveNumber)
+      this.lastAutosave = saveNumber
+      break
     case 'Quicksave':
-      return (this.lastQuicksave = saveNumber)
+      this.lastQuicksave = saveNumber
+      break
   }
 }
 
+/**
+ * Functions that gives the last save number of the given save type.
+ * @param {'Autosave' | 'Quicksave'} saveType the type to retrieve the last save number for.
+ * @returns {number}
+ */
 window.DataManager.returnLastSave = function (saveType) {
   switch (saveType) {
     case 'Autosave':
@@ -65,7 +77,11 @@ window.DataManager._numOfAutosaves = 0
 window.DataManager._numOfQuicksaves = 0
 window.DataManager._numOfHardsaves = 0
 
-// This is mostly for Hardsave since Autosave and Quicksave cycle through it's kinda pointless to use for them.
+/**
+ * Function that finds the next available hard save number. This is mostly for when a save is deleted it will find
+ * the gaps and create a save on those empty spots.
+ * @returns { number }
+ */
 window.DataManager.nextEmptyHardsave = function () {
   let saveTest = 1
   let returnNum = 0
@@ -82,7 +98,11 @@ window.DataManager.nextEmptyHardsave = function () {
   return returnNum > 0 ? returnNum : 1
 }
 
-// new function to return the amount of certain type of save.
+/**
+ * Function that returns the current number of saves of a type.
+ * @param {'Autosave' | 'Quicksave' | 'Hardsave'} saveType the string key of the save type.
+ * @returns { number } if this fails it returns -1.
+ */
 window.DataManager.returnSavesNum = function (saveType) {
   switch (saveType) {
     case 'Autosave':
@@ -96,34 +116,48 @@ window.DataManager.returnSavesNum = function (saveType) {
   }
 }
 
-// new function to increase the countOf of the different types.
+/**
+ * Function the adds 1 to the current save of the given save type.
+ * @param {'Autosave' | 'Quicksave' | 'Hardsave'} saveType the string key of the save type.
+ */
 window.DataManager.incrementSavesNum = function (saveType) {
   switch (saveType) {
     case 'Autosave':
-      return this._numOfAutosaves++
+      this._numOfAutosaves++
+      break
     case 'Quicksave':
-      return this._numOfQuicksaves++
+      this._numOfQuicksaves++
+      break
     case 'Hardsave':
-      return this._numOfHardsaves++
+      this._numOfHardsaves++
+      break
   }
 }
 
-// new function to decrease the countOf of the different types.
+/**
+ * Function that removes 1 from the current save of the given save type.
+ * @param {'Autosave' | 'Quicksave' | 'Hardsave'} saveType the string key of the save type.
+ */
 window.DataManager.decrementSavesNum = function (saveType) {
   switch (saveType) {
     case 'Autosave':
-      return this._numOfAutosaves--
+      this._numOfAutosaves--
+      break
     case 'Quicksave':
-      return this._numOfQuicksaves--
+      this._numOfQuicksaves--
+      break
     case 'Hardsave':
-      return this._numOfHardsaves--
+      this._numOfHardsaves--
+      break
   }
 }
 
-// new function to get the current total of saves.
+/**
+ * Function to get the current total of all the different save types.
+ * @returns { number } the current total of all the different save types.
+ */
 window.DataManager.currentTotalSavesNum = function () {
-  const autoSaveCount = enableAutosave ? this._numOfAutosaves : 0
-  return autoSaveCount + this._numOfQuicksaves + this._numOfHardsaves
+  return this._numOfAutosaves + this._numOfQuicksaves + this._numOfHardsaves
 }
 
 // ================================================
@@ -133,38 +167,34 @@ window.DataManager._maxAutoSaves = enableAutosave ? (maxAutosaves > 0 ? maxAutos
 window.DataManager._maxQuicksaves = enableQuicksave ? (maxQuicksaves > 0 ? maxQuicksaves : 1) : 0
 window.DataManager._maxHardsaves = enableHardsave ? (maxHardsaves > 0 ? maxHardsaves : 1) : 0
 
-// Add in the max autosaves + quicksaves.
+/**
+ * Function that returns the max amount of save files.
+ * @returns { number }
+ */
 window.DataManager.maxSavefiles = function () {
-  return this.maxHardsaves() + this.maxAutosaves() + this.maxQuickSaves()
+  return (
+    this.returnMaxSavesOf('Autosave') +
+    this.returnMaxSavesOf('Quicksave') +
+    this.returnMaxSavesOf('Hardsave')
+  )
 }
 
-// new function to return the max saves based on the type given.
-window.DataManager.returnMaxSaves = function (saveType) {
+/**
+ * Function to get the max saves of the different save types.
+ * @param {'Autosave' | 'Quicksave' | 'Hardsave'} saveType the string key of the save type.
+ * @returns { number }
+ */
+window.DataManager.returnMaxSavesOf = function (saveType) {
   switch (saveType) {
     case 'Autosave':
-      return this.maxAutosaves()
+      return this._maxAutoSaves
     case 'Quicksave':
-      return this.maxQuickSaves()
+      return this._maxQuicksaves
     case 'Hardsave':
-      return this.maxHardsaves()
+      return this._maxHardsaves
     default:
       return -1
   }
-}
-
-// new, the amount of autosaves in the rotation.
-window.DataManager.maxAutosaves = function () {
-  return this._maxAutoSaves
-}
-
-// new, the amount of quicksaves in the rotation.
-window.DataManager.maxQuickSaves = function () {
-  return this._maxQuicksaves
-}
-
-// new, the max amount of hardsaves.
-window.DataManager.maxHardsaves = function () {
-  return this._maxHardsaves
 }
 
 // These are no longer used.
@@ -176,7 +206,11 @@ delete window.DataManager.emptySavefileId
 // ======================================
 // Handle GlobalInfo
 
-// This handles shifting the save to the first index of globalInfo, and saves globalInfo
+/**
+ * Function that checks for the saveId then if it is found places it in front of the globalInfo array.
+ * @param {*} saveId the save file id to be checked for within globalInfo.
+ * @param {*} dataManager a reference to the DataManager class.
+ */
 const makeGlobalInfoSave = function (saveId, dataManager) {
   const fileIndex = dataManager._globalInfo.findIndex((file) => file.savefileId === saveId)
 
@@ -202,10 +236,14 @@ const makeGlobalInfoSave = function (saveId, dataManager) {
   dataManager.saveGlobalInfo()
 }
 
-// Have to send the filename to the electron side and
-// the return if it fails triggers the delete globalInfo.
+/**
+ * Function that checks each member of the globalInfo array and sends the savefileId to electron
+ * to check if it exists. If it doesn't exists it will be removed from the globalInfo array.
+ */
 window.DataManager.removeInvalidGlobalInfo = async function () {
+  // An array that collects invalid globalInfos to be removed after it checks each one.
   const removeIndex = []
+
   for await (const info of this._globalInfo) {
     // savefileId is the same as the saveFileName
     const savefileId = info.savefileId
@@ -314,15 +352,18 @@ window.DataManager.savefileInfo = function (savefileId) {
   return saveInfo ? saveInfo : null
 }
 
-// Used for Autosave and Quicksave in order to create the savefileId
-// and increment the current number of saves if needed.
+/**
+ * Function that cycles the save number of an autosave or quicksave.
+ * @param {'Autosave' | 'Hardsave'} saveType the string key of the save type.
+ * @returns {string} a new savefileId string.
+ */
 const makeSavefileId = function (saveType) {
   const dataManager = window.DataManager
   let savefileId = ''
 
   const lastSave = dataManager.returnLastSave(saveType)
   const currentSaveNum = dataManager.returnSavesNum(saveType)
-  const maxSaves = dataManager.returnMaxSaves(saveType)
+  const maxSaves = dataManager.returnMaxSavesOf(saveType)
 
   if (lastSave === maxSaves) {
     savefileId = `${saveType}-1`
@@ -373,12 +414,12 @@ window.Window_MenuCommand.prototype.addSaveCommand = function () {
 // ================================================
 // Window_SavefileList
 
+// EDIT: overwrite -> removes this._autosave in initialize and setMode.
 window.Window_SavefileList.prototype.initialize = function (rect) {
   window.Window_Selectable.prototype.initialize.call(this, rect)
   this.activate()
   this._mode = null
 }
-
 window.Window_SavefileList.prototype.setMode = function (mode) {
   this._mode = mode
   this.refresh()
@@ -397,6 +438,8 @@ window.Window_SavefileList.prototype.maxItems = function () {
   }
 }
 
+// EDIT: overwrite -> adds the emptySlotName instead of the old check for
+// this._autosave.
 window.Window_SavefileList.prototype.indexToSavefileId = function (index) {
   if (window.DataManager.currentTotalSavesNum() > index) {
     return window.DataManager._globalInfo[index].savefileId
@@ -420,6 +463,7 @@ window.Window_SavefileList.prototype.isEnabled = function (savefileId) {
   }
 }
 
+// This is no longer used, because it never converts back to an index.
 delete window.Window_SavefileList.savefileIdToIndex
 
 // No longer has to factor in autosaves, since the most recent is always index 0.
@@ -428,6 +472,7 @@ window.Window_SavefileList.prototype.selectSavefile = function (index) {
   this.setTopRow(index - 2)
 }
 
+// EDIT: removes check for savefileId 0 since it is no longer the autosave slot.
 window.Window_SavefileList.prototype.drawTitle = function (savefileId, x, y) {
   this.drawText(savefileId, x, y, 180)
 }
@@ -438,6 +483,7 @@ window.Window_SavefileList.prototype.drawTitle = function (savefileId, x, y) {
 // ================================================
 // Scene_Base
 
+// EDIT: adds a check for the enableAutosave and the window.ConfigManager.enableAutosaving.
 window.Scene_Base.prototype.isAutosaveEnabled = function () {
   return (
     !window.DataManager.isBattleTest() &&
@@ -448,6 +494,7 @@ window.Scene_Base.prototype.isAutosaveEnabled = function () {
   )
 }
 
+// EDIT: changes the way the autosaves are saved.
 window.Scene_Base.prototype.executeAutosave = function () {
   const autosaveId = makeSavefileId('Autosave')
 
@@ -475,10 +522,11 @@ window.Scene_Base.prototype.executeAutosave = function () {
 // ================================================
 // ConfigManager
 
+// EDIT: Add two new options into the ConfigManager.
 window.ConfigManager.enableAutosaving = true
 window.ConfigManager.enableQuicksaving = true
 
-// Add a player option to enable or disable autosaving and quicksaving.
+// EDIT: Add a player option to enable or disable autosaving and quicksaving.
 const DDM_ALIAS_CONFIGMANAGER_MAKEDATA = window.ConfigManager.makeData
 window.ConfigManager.makeData = function () {
   const config = DDM_ALIAS_CONFIGMANAGER_MAKEDATA.call(this)
@@ -502,7 +550,7 @@ window.ConfigManager.applyData = function (config) {
 // ================================================
 // Window_Options
 
-// Add in autosave and quicksave options if players don't want to use them.
+// EDIT: Add in autosave and quicksave options if players don't want to use them.
 const DDM_ALIAS_WINDOW_OPTIONS_MAKECOMMANDLIST = window.Window_Options.prototype.makeCommandList
 window.Window_Options.prototype.makeCommandList = function () {
   DDM_ALIAS_WINDOW_OPTIONS_MAKECOMMANDLIST.call(this)
@@ -513,6 +561,7 @@ window.Window_Options.prototype.makeCommandList = function () {
 // ================================================
 // Scene_File
 
+// EDIT: Removes this.needsAutosave from setMode.
 window.Scene_File.prototype.createListWindow = function () {
   const rect = this.listWindowRect()
   this._listWindow = new window.Window_SavefileList(rect)
@@ -533,10 +582,12 @@ delete window.Scene_File.prototype.needsAutosave
 // ================================================
 // Scene_Save
 
+// EDIT: index 0 is always the most recent save.
 window.Scene_Save.prototype.firstSavefileId = function () {
   return 0
 }
 
+// EDIT: changes the way a normal hard save is saved.
 window.Scene_Save.prototype.executeSave = function (savefileId) {
   let saveId = savefileId
   if (savefileId === emptySlotName) {
@@ -567,6 +618,7 @@ window.Scene_Save.prototype.executeSave = function (savefileId) {
 // ================================================
 // Scene_Load
 
+// EDIT: 0 is always the most recent save.
 window.Scene_Load.prototype.firstSavefileId = function () {
   return 0
 }
@@ -577,18 +629,20 @@ window.Scene_Load.prototype.firstSavefileId = function () {
 // ================================================
 // Scene_Map
 
-// Reset isQuickloading when the scene starts, so it will autosave on other transitions.
+// EDIT: Reset isQuickloading when the scene starts,
+// so it will autosave on other transitions.
 const DDM_ALIAS_SCENE_MAP_START = window.Scene_Map.prototype.start
 window.Scene_Map.prototype.start = function () {
   DDM_ALIAS_SCENE_MAP_START.call(this)
   if (window.DataManager.isQuickloading) window.DataManager.isQuickloading = false
 }
 
-// Prevent autosaving when quickloading.
+// EDIT: Prevent autosaving when quickloading.
 window.Scene_Map.prototype.shouldAutosave = function () {
   return !this._lastMapWasNull && !window.DataManager.isQuickloading
 }
 
+// New function that does the fading out when a quick load is called.
 window.Scene_Map.prototype.quickloadFade = function () {
   window.Graphics.screenTransition()
   const time = 0
