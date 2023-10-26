@@ -1,7 +1,9 @@
 import { useInputStore } from '../../store/inputs/useInputStore'
 
-// Doing this to avoid rerenders recreating functions.
-
+/**
+ * A container to hold as many functions without causing re-renders.
+ * @returns {null}
+ */
 const GameFunctions = () => {
   const saveInput = useInputStore((state) => state.saveInput)
   window.Input.saveInputs = function (resetToDefault) {
